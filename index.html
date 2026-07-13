@@ -78,12 +78,11 @@
             </div>
         </div>
         
-        <div class="flex items-center gap-3">
-            <span class="flex h-3 w-3 relative">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-            </span>
-            <span class="text-xs font-semibold text-slate-300">Modo Colaborativo Activo</span>
+        <div class="flex items-center gap-2 flex-wrap md:flex-nowrap">
+            <!-- Botón Compartir / Exportar -->
+            <button onclick="openShareExportModal()" class="bg-brand-teal hover:bg-brand-teallight text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-md shadow-brand-teal/20 transition flex items-center gap-1.5" title="Compartir proyecto o descargar reportes">
+                <i class="fa-solid fa-share-nodes"></i> Compartir / Exportar
+            </button>
             <button onclick="resetToDefaults()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition flex items-center gap-1.5" title="Restaurar datos iniciales">
                 <i class="fa-solid fa-rotate-left"></i> Restaurar MVP
             </button>
@@ -396,6 +395,65 @@
         </div>
     </div>
 
+    <!-- MODAL DE COMPARTIR Y EXPORTAR (NUEVO) -->
+    <div id="share-export-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+            <div class="flex justify-between items-center mb-5 border-b border-slate-800 pb-3">
+                <h3 class="text-md font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-share-nodes text-brand-teal"></i> Compartir y Exportar Proyecto
+                </h3>
+                <button onclick="closeShareExportModal()" class="text-slate-400 hover:text-slate-200 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- Compartir por URL -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-link text-brand-teal"></i> Compartir enlace dinámico
+                    </h4>
+                    <p class="text-xs text-slate-400">Copia este enlace. Al abrirlo, el destinatario cargará exactamente la configuración y datos actuales de tu Workspace.</p>
+                    <div class="flex gap-2">
+                        <input id="share-link-input" readonly type="text" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-brand-teal font-mono select-all">
+                        <button onclick="copyShareLink()" class="bg-brand-teal hover:bg-brand-teallight text-white font-bold text-xs px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap">
+                            <i class="fa-solid fa-copy"></i> Copiar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Descargar Reportes -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-arrow-down text-brand-teal"></i> Descargar Reportes y Copias
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <!-- Botón Descargar JSON -->
+                        <button onclick="downloadJSON()" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 hover:text-white p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition group">
+                            <i class="fa-solid fa-file-code text-2xl text-amber-500 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-xs font-bold block">JSON Backup</span>
+                            <span class="text-[9px] text-slate-400">Guarda todo el estado</span>
+                        </button>
+                        <!-- Botón Descargar Markdown -->
+                        <button onclick="downloadMarkdown()" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 hover:text-white p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition group">
+                            <i class="fa-solid fa-file-word text-2xl text-blue-500 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-xs font-bold block">Markdown (.md)</span>
+                            <span class="text-[9px] text-slate-400">Listo para Confluence</span>
+                        </button>
+                        <!-- Botón Descargar CSV -->
+                        <button onclick="downloadCSV()" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 hover:text-white p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition group">
+                            <i class="fa-solid fa-file-csv text-2xl text-emerald-500 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-xs font-bold block">CSV (Backlog)</span>
+                            <span class="text-[9px] text-slate-400">Para importar a Jira/Excel</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-6 pt-3 border-t border-slate-800">
+                <button onclick="closeShareExportModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2.5 rounded-lg transition">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // VARIABLES DE ESTADO LOCAL ACTUALIZADAS SEGÚN REQUERIMIENTOS
         let projectData = {
@@ -483,11 +541,30 @@
         };
 
         function loadProjectData() {
+            // Verificar primero si hay un proyecto compartido en la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const sharedProject = urlParams.get('project');
+            if (sharedProject) {
+                try {
+                    // Decodificar Base64 de forma robusta para caracteres UTF-8
+                    const parsed = JSON.parse(decodeURIComponent(escape(atob(sharedProject))));
+                    projectData = parsed;
+                    saveProjectToStorage();
+                    // Limpiar la URL para evitar recargas accidentales o URLs excesivamente largas
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    setTimeout(() => {
+                        showToast("¡Proyecto compartido cargado con éxito!");
+                    }, 500);
+                    return;
+                } catch (e) {
+                    console.error("Error al cargar proyecto compartido", e);
+                }
+            }
+
             const saved = localStorage.getItem("loterias_ai_project_updated");
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    // Asegurar consistencia de nuevas propiedades
                     projectData = { ...projectData, ...parsed };
                 } catch (e) {
                     console.error("Error cargando datos locales:", e);
@@ -520,6 +597,103 @@
                     btn.classList.add('border-transparent', 'text-slate-400');
                 }
             });
+        }
+
+        // MODALES DE COMPARTIR Y DESCARGAR
+        function openShareExportModal() {
+            const modal = document.getElementById('share-export-modal');
+            const linkInput = document.getElementById('share-link-input');
+            
+            try {
+                // Serializar datos a JSON -> codificar UTF-8 -> codificar Base64
+                const serialized = btoa(unescape(encodeURIComponent(JSON.stringify(projectData))));
+                const shareUrl = window.location.origin + window.location.pathname + "?project=" + serialized;
+                linkInput.value = shareUrl;
+            } catch (e) {
+                console.error("Error al generar link de compartir", e);
+                linkInput.value = window.location.href;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeShareExportModal() {
+            document.getElementById('share-export-modal').classList.add('hidden');
+        }
+
+        function copyShareLink() {
+            const linkInput = document.getElementById('share-link-input');
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999); /* Para móviles */
+            
+            try {
+                // Cumplimiento estricto de la directiva de Clipboard en IFrame
+                document.execCommand('copy');
+                showToast("¡Enlace de compartir copiado al portapapeles!");
+            } catch (err) {
+                console.error("No se pudo copiar con execCommand", err);
+                showToast("Por favor, copia manualmente el enlace seleccionado");
+            }
+        }
+
+        function downloadJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectData, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "proyecto_loterias_ia.json");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast("JSON descargado correctamente");
+        }
+
+        function downloadMarkdown() {
+            let md = `# ${projectData.title}\n\n`;
+            md += `## Descripción\n${projectData.description}\n\n`;
+            md += `## Misión y Objetivos de CX\n${projectData.goal}\n\n`;
+            md += `## Roadmap del Producto\n`;
+            projectData.phases.forEach(p => {
+                md += `### ${p.title} (${p.type})\n*Tag Técnico: ${p.tag}*\n${p.description}\n`;
+                p.bullets.forEach(b => { md += `- ${b}\n`; });
+                md += `\n`;
+            });
+            md += `## Milestones y Artefactos\n`;
+            projectData.milestones.forEach(m => {
+                md += `### ${m.title} (${m.phase})\n${m.description}\n*Artefactos requeridos:* ${m.artifacts.join(', ')}\n\n`;
+            });
+            md += `## Backlog de Trabajo (S1 - S12)\n`;
+            projectData.backlog.forEach(b => {
+                const statusLabel = b.status === 'done' ? '[x] Completado' : b.status === 'in_progress' ? '[/] En Progreso' : '[ ] Pendiente';
+                md += `- ${statusLabel} - Semana ${b.week}: ${b.name} (${b.owner})\n`;
+            });
+            md += `\n## Objetivos y KPIs de Experiencia\n`;
+            projectData.kpis.forEach(k => {
+                md += `- **${k.name}**: Meta ${k.value}${k.unit} - ${k.desc}\n`;
+            });
+
+            const dataStr = "data:text/markdown;charset=utf-8," + encodeURIComponent(md);
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "reporte_proyecto_loterias.md");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast("Reporte en Markdown descargado");
+        }
+
+        function downloadCSV() {
+            let csv = "ID,Tarea,Estado,Semana,Responsable\n";
+            projectData.backlog.forEach(b => {
+                csv += `"${b.id}","${b.name.replace(/"/g, '""')}","${b.status}","${b.week}","${b.owner.replace(/"/g, '""')}"\n`;
+            });
+            const dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "backlog_tareas_loterias.csv");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast("Archivo CSV descargado con éxito");
         }
 
         // EDICIÓN EN CALIENTE DE DESCRIPCIÓN
@@ -642,7 +816,7 @@
             const bulletsRaw = document.getElementById('new-phase-bullets').value;
 
             if(!title || !description) {
-                alert("Por favor completa los campos principales de la fase");
+                showToast("Por favor, completa los campos principales de la fase");
                 return;
             }
 
@@ -661,7 +835,7 @@
             saveProjectToStorage();
             renderPhases();
             closeModal();
-            showToast("Nueva fase agregada con éxito al Roadmap");
+            showToast("Nueva fase agregada al Roadmap");
         }
 
         // RENDERIZACIÓN DINÁMICA DE MILESTONES & ARTEFACTOS
@@ -836,7 +1010,7 @@
             const week = parseInt(document.getElementById('new-task-week').value);
 
             if(!name) {
-                alert("Por favor completa el nombre de la tarea");
+                showToast("Por favor, completa el nombre de la tarea");
                 return;
             }
 
@@ -928,7 +1102,7 @@
             const desc = document.getElementById('new-kpi-desc').value;
 
             if(!name || !val) {
-                alert("Por favor completa los campos principales de la métrica");
+                showToast("Por favor, completa los campos principales de la métrica");
                 return;
             }
 
