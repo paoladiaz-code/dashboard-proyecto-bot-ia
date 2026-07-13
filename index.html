@@ -13,6 +13,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- Biblioteca jsPDF para exportar a PDF (Nueva) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -395,7 +398,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE COMPARTIR Y EXPORTAR (NUEVO) -->
+    <!-- MODAL DE COMPARTIR Y EXPORTAR -->
     <div id="share-export-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
             <div class="flex justify-between items-center mb-5 border-b border-slate-800 pb-3">
@@ -425,7 +428,7 @@
                     <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                         <i class="fa-solid fa-file-arrow-down text-brand-teal"></i> Descargar Reportes y Copias
                     </h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         <!-- Botón Descargar JSON -->
                         <button onclick="downloadJSON()" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 hover:text-white p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition group">
                             <i class="fa-solid fa-file-code text-2xl text-amber-500 group-hover:scale-110 transition-transform"></i>
@@ -443,6 +446,12 @@
                             <i class="fa-solid fa-file-csv text-2xl text-emerald-500 group-hover:scale-110 transition-transform"></i>
                             <span class="text-xs font-bold block">CSV (Backlog)</span>
                             <span class="text-[9px] text-slate-400">Para importar a Jira/Excel</span>
+                        </button>
+                        <!-- Botón Descargar Presentación PDF (Nuevo) -->
+                        <button onclick="downloadPDFPresentation()" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 hover:text-white p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition group">
+                            <i class="fa-solid fa-file-pdf text-2xl text-rose-500 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-xs font-bold block">Presentación PDF</span>
+                            <span class="text-[9px] text-slate-400">PDF listo para exponer</span>
                         </button>
                     </div>
                 </div>
@@ -694,6 +703,327 @@
             dlAnchor.click();
             dlAnchor.remove();
             showToast("Archivo CSV descargado con éxito");
+        }
+
+        // DESCARGAR PRESENTACIÓN COMO PDF (NUEVO)
+        function downloadPDFPresentation() {
+            try {
+                const { jsPDF } = window.jspdf;
+                // Landscape (apaisado), milímetros, tamaño de página A4
+                const doc = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                // --- SLIDE 1: PORTADA ---
+                doc.setFillColor(15, 23, 42); // Slate 900
+                doc.rect(0, 0, 297, 210, 'F');
+                
+                // Barra de acento
+                doc.setFillColor(13, 148, 136); // Brand Teal
+                doc.rect(20, 45, 4, 120, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(28);
+                doc.text(projectData.title, 35, 70, { maxWidth: 240 });
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(13);
+                doc.setTextColor(148, 163, 184); // Slate 400
+                doc.text(projectData.description, 35, 115, { maxWidth: 230 });
+                
+                doc.setFontSize(11);
+                doc.setTextColor(13, 148, 136); // Teal
+                doc.text("WORKSPACE DE ARQUITECTURA CONVERSACIONAL", 35, 155);
+                
+                // Footer
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
+                doc.text("Página 1", 270, 195);
+
+                // --- SLIDE 2: OBJETIVOS & KPIS ---
+                doc.addPage();
+                doc.setFillColor(248, 250, 252); // Slate 50
+                doc.rect(0, 0, 297, 210, 'F');
+                
+                // Header
+                doc.setFillColor(13, 148, 136);
+                doc.rect(20, 15, 3, 12, 'F');
+                doc.setTextColor(15, 23, 42);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(20);
+                doc.text("Misión Estratégica & KPIs de Experiencia", 28, 24);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(11);
+                doc.setTextColor(71, 85, 105);
+                doc.text(projectData.goal, 20, 40, { maxWidth: 257 });
+                
+                // Dibujar 3 Columnas para KPIs
+                let colW = 79;
+                let gap = 10;
+                projectData.kpis.forEach((kpi, idx) => {
+                    let colX = 20 + idx * (colW + gap);
+                    
+                    // Fondo de tarjeta
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect(colX, 70, colW, 100, 4, 4, 'FD');
+                    
+                    // Barra superior de acento
+                    doc.setFillColor(13, 148, 136);
+                    doc.rect(colX, 70, colW, 1.5, 'F');
+                    
+                    // Título de KPI
+                    doc.setTextColor(15, 23, 42);
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(12);
+                    doc.text(kpi.name, colX + 6, 82, { maxWidth: colW - 12 });
+                    
+                    // Descripción
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(10);
+                    doc.setTextColor(100, 116, 139);
+                    doc.text(kpi.desc, colX + 6, 100, { maxWidth: colW - 12 });
+                    
+                    // Valor
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(32);
+                    doc.setTextColor(13, 148, 136);
+                    doc.text(`${kpi.value}${kpi.unit}`, colX + 6, 155);
+                });
+                
+                // Footer
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
+                doc.text("Página 2", 270, 195);
+
+                // --- SLIDE 3: ROADMAP FASE 1 ---
+                doc.addPage();
+                doc.setFillColor(248, 250, 252);
+                doc.rect(0, 0, 297, 210, 'F');
+                
+                // Header
+                doc.setFillColor(13, 148, 136);
+                doc.rect(20, 15, 3, 12, 'F');
+                doc.setTextColor(15, 23, 42);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(20);
+                doc.text(projectData.phases[0].title, 28, 24);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(11);
+                doc.setTextColor(13, 148, 136);
+                doc.text(`Enfoque técnico: ${projectData.phases[0].tag} | Enfoque de UX: ${projectData.phases[0].type}`, 20, 38);
+                
+                doc.setTextColor(71, 85, 105);
+                doc.setFontSize(11);
+                doc.text(projectData.phases[0].description, 20, 48, { maxWidth: 257 });
+                
+                // Bloque contenedor de bullets
+                doc.setFillColor(255, 255, 255);
+                doc.roundedRect(20, 68, 257, 110, 4, 4, 'FD');
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(12);
+                doc.setTextColor(15, 23, 42);
+                doc.text("Entregables y Pilares de la Fase 1:", 28, 78);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(11);
+                doc.setTextColor(71, 85, 105);
+                
+                projectData.phases[0].bullets.forEach((bullet, bIdx) => {
+                    let textY = 92 + (bIdx * 24);
+                    // Punto de viñeta
+                    doc.setFillColor(13, 148, 136);
+                    doc.circle(30, textY - 1, 1.5, 'F');
+                    
+                    doc.text(bullet, 36, textY, { maxWidth: 230 });
+                });
+                
+                // Footer
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
+                doc.text("Página 3", 270, 195);
+
+                // --- SLIDE 4: ROADMAP FASE 2 ---
+                doc.addPage();
+                doc.setFillColor(248, 250, 252);
+                doc.rect(0, 0, 297, 210, 'F');
+                
+                // Header
+                doc.setFillColor(13, 148, 136);
+                doc.rect(20, 15, 3, 12, 'F');
+                doc.setTextColor(15, 23, 42);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(20);
+                doc.text(projectData.phases[1].title, 28, 24);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(11);
+                doc.setTextColor(13, 148, 136);
+                doc.text(`Enfoque técnico: ${projectData.phases[1].tag} | Enfoque de UX: ${projectData.phases[1].type}`, 20, 38);
+                
+                doc.setTextColor(71, 85, 105);
+                doc.setFontSize(11);
+                doc.text(projectData.phases[1].description, 20, 48, { maxWidth: 257 });
+                
+                // Bloque de bullets
+                doc.setFillColor(255, 255, 255);
+                doc.roundedRect(20, 68, 257, 110, 4, 4, 'FD');
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(12);
+                doc.setTextColor(15, 23, 42);
+                doc.text("Entregables y Pilares de la Fase 2:", 28, 78);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(11);
+                doc.setTextColor(71, 85, 105);
+                
+                projectData.phases[1].bullets.forEach((bullet, bIdx) => {
+                    let textY = 92 + (bIdx * 24);
+                    // Punto de viñeta
+                    doc.setFillColor(13, 148, 136);
+                    doc.circle(30, textY - 1, 1.5, 'F');
+                    
+                    doc.text(bullet, 36, textY, { maxWidth: 230 });
+                });
+                
+                // Footer
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
+                doc.text("Página 4", 270, 195);
+
+                // --- SLIDE 5: MILESTONES & ARTEFACTS ---
+                doc.addPage();
+                doc.setFillColor(248, 250, 252);
+                doc.rect(0, 0, 297, 210, 'F');
+                
+                // Header
+                doc.setFillColor(13, 148, 136);
+                doc.rect(20, 15, 3, 12, 'F');
+                doc.setTextColor(15, 23, 42);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(20);
+                doc.text("Hitos de Arquitectura & Entregables", 28, 24);
+                
+                // Rejilla de hitos
+                let mColW = 123;
+                let mColGap = 11;
+                
+                projectData.milestones.forEach((ms, idx) => {
+                    let colX = 20 + (idx % 2) * (mColW + mColGap);
+                    let rowY = 40 + Math.floor(idx / 2) * 72;
+                    
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect(colX, rowY, mColW, 64, 4, 4, 'FD');
+                    
+                    // Borde lateral del hito
+                    doc.setFillColor(13, 148, 136);
+                    doc.rect(colX, rowY, 1.5, 64, 'F');
+                    
+                    // Fase
+                    doc.setFontSize(8);
+                    doc.setFont("helvetica", "bold");
+                    doc.setTextColor(13, 148, 136);
+                    doc.text(ms.phase.toUpperCase(), colX + 6, rowY + 8);
+                    
+                    // Título del Milestone
+                    doc.setFontSize(11);
+                    doc.setTextColor(15, 23, 42);
+                    doc.text(ms.title, colX + 6, rowY + 16, { maxWidth: mColW - 12 });
+                    
+                    // Descripción
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(9.5);
+                    doc.setTextColor(100, 116, 139);
+                    doc.text(ms.description, colX + 6, rowY + 28, { maxWidth: mColW - 12 });
+                    
+                    // Artefactos
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(8.5);
+                    doc.setTextColor(71, 85, 105);
+                    doc.text(`Entregables: ${ms.artifacts.join(', ')}`, colX + 6, rowY + 54, { maxWidth: mColW - 12 });
+                });
+                
+                // Footer
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
+                doc.text("Página 5", 270, 195);
+
+                // --- SLIDE 6: CRONOGRAMA & BACKLOG ---
+                doc.addPage();
+                doc.setFillColor(248, 250, 252);
+                doc.rect(0, 0, 297, 210, 'F');
+                
+                // Header
+                doc.setFillColor(13, 148, 136);
+                doc.rect(20, 15, 3, 12, 'F');
+                doc.setTextColor(15, 23, 42);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(20);
+                doc.text("Cronograma de Trabajo & Backlog", 28, 24);
+                
+                // Representación de Gantt
+                doc.setFillColor(255, 255, 255);
+                doc.roundedRect(20, 40, 257, 58, 4, 4, 'FD');
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(11);
+                doc.setTextColor(15, 23, 42);
+                doc.text("Fases en el Cronograma de 12 Semanas:", 26, 48);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(9.5);
+                doc.setTextColor(71, 85, 105);
+                doc.text("• Fase 1 - Diseño y RAG base: Semanas 1 a 5 (Estudio de intents, Figma y carga de base vectorial).", 30, 58);
+                doc.text("• Fase 1.5 - Cross-selling & Promociones: Semanas 6 a 7 (Motor de recomendaciones contextuales).", 30, 68);
+                doc.text("• Fase 2 - Autenticación y Conexión Core: Semanas 8 a 12 (Middleware de identidad, APIs transaccionales y cobros).", 30, 78);
+                doc.text("• QA Funcional, Seguridad y Deploy: Semanas 11 a 12.", 30, 88);
+                
+                // Resumen de backlog
+                doc.setFillColor(255, 255, 255);
+                doc.roundedRect(20, 105, 257, 72, 4, 4, 'FD');
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(11);
+                doc.setTextColor(15, 23, 42);
+                doc.text("Estatus del Backlog de Tareas:", 26, 114);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(9.5);
+                doc.setTextColor(71, 85, 105);
+                
+                let backlogTodo = projectData.backlog.filter(t => t.status === 'todo').length;
+                let backlogProgress = projectData.backlog.filter(t => t.status === 'in_progress').length;
+                let backlogDone = projectData.backlog.filter(t => t.status === 'done').length;
+                
+                doc.text(`Total Tareas Planificadas: ${projectData.backlog.length}`, 30, 126);
+                doc.text(`• Pendientes de iniciar (Backlog): ${backlogTodo} tareas`, 30, 136);
+                doc.text(`• En ejecución activa (En Progreso): ${backlogProgress} tareas`, 30, 146);
+                doc.text(`• Validadas y cerradas (Completado): ${backlogDone} tareas`, 30, 156);
+                
+                // Footer
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
+                doc.text("Página 6", 270, 195);
+
+                // Guardar PDF resultante
+                doc.save("Presentacion_Proyecto_Loterias_IA.pdf");
+                showToast("Presentación descargada como PDF");
+            } catch (err) {
+                console.error("Error al exportar PDF:", err);
+                showToast("Hubo un error al generar la presentación PDF");
+            }
         }
 
         // EDICIÓN EN CALIENTE DE DESCRIPCIÓN
