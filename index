@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecosistema de Diseño Conversacional - Loterías IA</title>
+    <!-- Tailwind CSS para diseño moderno y premium -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome para Iconografía fluida -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            slate: '#0f172a', /* Slate 900 */
+                            card: '#1e293b',  /* Slate 800 */
+                            teal: '#0d9488',  /* Teal 600 - Menta */
+                            teallight: '#14b8a6', /* Teal 500 */
+                            mintbg: '#f0fdfa', /* Teal 50 */
+                            border: '#334155',  /* Slate 700 */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .dark-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        /* Transiciones fluidas */
+        .tab-transition {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col overflow-hidden">
+
+    <!-- ENCABEZADO PRINCIPAL DE LA PLATAFORMA -->
+    <header class="bg-slate-950 border-b border-slate-800 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 z-10 shrink-0 shadow-lg">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-tr from-brand-teal to-emerald-400 rounded-xl flex items-center justify-center text-white text-lg font-bold shadow-md shadow-brand-teal/20 animate-pulse">
+                <i class="fa-solid fa-dice-d20"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
+                    Loterías IA: Workspace Conversacional
+                </h1>
+                <p class="text-xs text-slate-400 font-medium">Consola de Arquitectura Conversacional & Product Management</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <span class="flex h-3 w-3 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            </span>
+            <span class="text-xs font-semibold text-slate-300">Modo Colaborativo Activo</span>
+            <button onclick="resetToDefaults()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition flex items-center gap-1.5" title="Restaurar datos iniciales">
+                <i class="fa-solid fa-rotate-left"></i> Restaurar MVP
+            </button>
+        </div>
+    </header>
+
+    <!-- WORKSPACE PRINCIPAL EN REJILLA RESPONSIVA -->
+    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+        
+        <!-- PANEL DE CONTROL IZQUIERDO (CONSOLA DE PROYECTO) -->
+        <section class="w-full lg:w-3/5 flex flex-col border-r border-slate-800 bg-slate-950/40 overflow-hidden">
+            <!-- Selector de Tabs para organización limpia -->
+            <div class="flex bg-slate-950/80 border-b border-slate-800 shrink-0 overflow-x-auto scrollbar-none">
+                <button onclick="switchTab('tab-specs')" id="btn-tab-specs" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-brand-teal text-brand-teal bg-slate-900/50 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-file-invoice"></i> Especificaciones
+                </button>
+                <button onclick="switchTab('tab-roadmap')" id="btn-tab-roadmap" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/20 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-route"></i> Fases del Roadmap
+                </button>
+                <button onclick="switchTab('tab-milestones')" id="btn-tab-milestones" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/20 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-flag-checkered"></i> Milestones & Artefactos
+                </button>
+                <button onclick="switchTab('tab-gantt')" id="btn-tab-gantt" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/20 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-chart-gantt"></i> Gantt & Backlog
+                </button>
+                <button onclick="switchTab('tab-kpis')" id="btn-tab-kpis" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/20 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-chart-line"></i> Objetivos y KPIs
+                </button>
+            </div>
+
+            <!-- CONTENIDO DE TABS -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-6 dark-scrollbar">
+                
+                <!-- TAB 1: ESPECIFICACIONES GENERALES -->
+                <div id="tab-specs" class="space-y-6">
+                    <div class="bg-brand-card rounded-2xl border border-brand-border p-6 shadow-xl relative overflow-hidden group">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-brand-teal to-emerald-400"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-2">
+                                <span class="p-1.5 bg-teal-500/10 text-brand-teal rounded-lg"><i class="fa-solid fa-circle-info"></i></span>
+                                <h3 class="text-lg font-bold text-slate-100">Descripción General del Proyecto</h3>
+                            </div>
+                            <button onclick="toggleEdit('project-description')" class="text-xs text-brand-teal hover:text-teal-400 font-semibold flex items-center gap-1 transition">
+                                <i class="fa-solid fa-pen-to-square"></i> <span id="btn-edit-text-desc">Editar</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Texto editable en caliente -->
+                        <div id="desc-view-mode" class="space-y-3">
+                            <h4 id="project-title-display" class="text-xl font-extrabold text-slate-100 tracking-tight">Asistente Virtual Inteligente – Experiencia Omnicanal Loterías</h4>
+                            <p id="project-desc-display" class="text-sm text-slate-300 leading-relaxed">
+                                El proyecto consiste en el diseño, desarrollo e implementación de un Asistente Virtual basado en Inteligencia Artificial Generativa (GenAI) y Procesamiento de Lenguaje Natural (NLP), integrado nativamente en la interfaz de la nueva plataforma web de loterías.
+                            </p>
+                            <p id="project-goal-display" class="text-sm text-slate-300 leading-relaxed">
+                                El objetivo principal es transformar la navegación del usuario en una experiencia guiada, lúdica y sin fricciones. El bot actuará como un copiloto conversacional que acompaña al cliente a lo largo de su customer journey, resolviendo dudas inmediatas en momentos críticos (preventa y postventa) y fomentando la retención.
+                            </p>
+                        </div>
+                        
+                        <!-- Formulario de edición oculto -->
+                        <div id="desc-edit-mode" class="hidden space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Título del Proyecto</label>
+                                <input id="edit-project-title" type="text" class="w-full bg-slate-900 border border-brand-border rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Descripción General</label>
+                                <textarea id="edit-project-desc" rows="3" class="w-full bg-slate-900 border border-brand-border rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal resize-none"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Misión y Objetivos de CX</label>
+                                <textarea id="edit-project-goal" rows="3" class="w-full bg-slate-900 border border-brand-border rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal resize-none"></textarea>
+                            </div>
+                            <div class="flex justify-end gap-2">
+                                <button onclick="saveDescription()" class="bg-brand-teal hover:bg-brand-teallight text-white text-xs font-bold px-3 py-2 rounded-lg transition">Guardar Cambios</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN DINÁMICA: NUEVOS MÓDULOS GENERADOS POR IA -->
+                    <div class="border-t border-slate-800 pt-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-md font-bold text-slate-200 flex items-center gap-2">
+                                <i class="fa-solid fa-folder-plus text-brand-teal"></i> Módulos Adicionales y Flujos Detallados
+                            </h3>
+                            <span class="text-xs bg-slate-800 px-2 py-1 rounded-md text-slate-400 font-medium">Auto-alimentable</span>
+                        </div>
+                        
+                        <div id="ai-modules-container" class="space-y-4">
+                            <!-- Los módulos agregados por el usuario o la IA aparecerán aquí -->
+                            <div id="no-modules-placeholder" class="bg-slate-900/50 rounded-xl border border-dashed border-slate-800 p-8 text-center">
+                                <p class="text-sm text-slate-400">¿Quieres profundizar en un flujo de cobro de premios, promociones o integraciones avanzadas?</p>
+                                <p class="text-xs text-brand-teal mt-2">Pídele a la IA copiloto de la derecha que te ayude a estructurar nuevos módulos y haz clic en "Añadir al Tablero".</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: ROADMAP DE FASES -->
+                <div id="tab-roadmap" class="hidden space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-slate-100">Fases del Ecosistema Conversacional</h3>
+                        <button onclick="openAddPhaseModal()" class="bg-brand-teal hover:bg-brand-teallight text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Añadir Nueva Fase
+                        </button>
+                    </div>
+
+                    <div id="phases-list" class="space-y-6 relative before:absolute before:left-6 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800">
+                        <!-- Las fases del roadmap se renderizan dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- TAB 3: MILESTONES & ARTEFACTOS -->
+                <div id="tab-milestones" class="hidden space-y-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-100">Milestones y Artefactos Requeridos</h3>
+                            <p class="text-xs text-slate-400 mt-1">Estructura clave de entregables para diseño conversacional y arquitectura de software.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="milestones-container">
+                        <!-- Los hitos se renderizan de forma dinámica desde JS -->
+                    </div>
+                </div>
+
+                <!-- TAB 4: GANTT & BACKLOG -->
+                <div id="tab-gantt" class="hidden space-y-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-100">Planificador del Proyecto (Cronograma Gantt)</h3>
+                        <p class="text-xs text-slate-400 mt-1">Gantt interactivo a 12 semanas para las fases de diseño y desarrollo.</p>
+                    </div>
+
+                    <!-- Gantt Chart Container -->
+                    <div class="bg-brand-card border border-brand-border rounded-2xl p-4 overflow-x-auto shadow-xl dark-scrollbar">
+                        <div class="min-w-[700px] space-y-3">
+                            <!-- Gantt Header Weeks -->
+                            <div class="grid grid-cols-13 gap-2 border-b border-slate-700 pb-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <div class="col-span-4 text-left">Tarea / Actividad</div>
+                                <div class="col-span-9 grid grid-cols-12 gap-1">
+                                    <div>S1</div><div>S2</div><div>S3</div><div>S4</div><div>S5</div><div>S6</div>
+                                    <div>S7</div><div>S8</div><div>S9</div><div>S10</div><div>S11</div><div>S12</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Gantt Rows (Generados Dinámicamente) -->
+                            <div id="gantt-rows" class="space-y-3">
+                                <!-- Las filas de tareas se llenan dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Backlog Scrum-like Board -->
+                    <div class="border-t border-slate-800 pt-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="text-md font-bold text-slate-200">Backlog de Tareas del Proyecto</h3>
+                                <p class="text-xs text-slate-400">Arrastra o cambia el estado de los entregables y artefactos.</p>
+                            </div>
+                            <button onclick="openAddTaskModal()" class="bg-brand-teal/20 border border-brand-teal text-brand-teallight px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 hover:bg-brand-teal hover:text-white">
+                                <i class="fa-solid fa-plus"></i> Nueva Tarea
+                            </button>
+                        </div>
+
+                        <!-- Kanban Columns -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="kanban-board">
+                            <!-- Columna 1: Por Hacer -->
+                            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex flex-col min-h-[300px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-xs font-bold text-slate-400 uppercase flex items-center gap-1.5">
+                                        <i class="fa-solid fa-hourglass-start text-amber-500"></i> Backlog
+                                    </span>
+                                    <span id="count-todo" class="text-xs bg-slate-800 px-2 py-0.5 rounded-md text-slate-300">0</span>
+                                </div>
+                                <div id="col-todo" class="space-y-3 flex-1 overflow-y-auto max-h-[350px] dark-scrollbar">
+                                    <!-- Tarjetas de tareas en estado TODO -->
+                                </div>
+                            </div>
+
+                            <!-- Columna 2: En Progreso -->
+                            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex flex-col min-h-[300px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-xs font-bold text-slate-400 uppercase flex items-center gap-1.5">
+                                        <i class="fa-solid fa-gears text-brand-teal animate-spin"></i> En Progreso
+                                    </span>
+                                    <span id="count-progress" class="text-xs bg-slate-800 px-2 py-0.5 rounded-md text-slate-300">0</span>
+                                </div>
+                                <div id="col-progress" class="space-y-3 flex-1 overflow-y-auto max-h-[350px] dark-scrollbar">
+                                    <!-- Tarjetas de tareas en estado PROGRESS -->
+                                </div>
+                            </div>
+
+                            <!-- Columna 3: Completado -->
+                            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex flex-col min-h-[300px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-xs font-bold text-slate-400 uppercase flex items-center gap-1.5">
+                                        <i class="fa-solid fa-circle-check text-emerald-500"></i> Completado
+                                    </span>
+                                    <span id="count-done" class="text-xs bg-slate-800 px-2 py-0.5 rounded-md text-slate-300">0</span>
+                                </div>
+                                <div id="col-done" class="space-y-3 flex-1 overflow-y-auto max-h-[350px] dark-scrollbar">
+                                    <!-- Tarjetas de tareas en estado DONE -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: OBJETIVOS Y KPIS -->
+                <div id="tab-kpis" class="hidden space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-slate-100">Métricas Clave de Rendimiento (KPIs)</h3>
+                        <button onclick="openAddKPIModal()" class="bg-brand-teal hover:bg-brand-teallight text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Añadir Indicador
+                        </button>
+                    </div>
+
+                    <div id="kpi-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Renderización dinámica de indicadores -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PANEL DE COPILOTO CON IA (WORKSPACE DE PRODUCTO DERECHA) -->
+        <section class="w-full lg:w-2/5 flex flex-col bg-slate-950 overflow-hidden relative">
+            <div class="p-4 border-b border-slate-800 bg-slate-900/80 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-3 h-3 bg-brand-teal rounded-full animate-ping"></div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-200">Copiloto IA Product Owner</h3>
+                        <p class="text-[10px] text-slate-400">Equipado con los Skills de Experto Conversacional</p>
+                    </div>
+                </div>
+                
+                <!-- Estado de la API -->
+                <div id="api-status" class="text-xs bg-slate-800 px-2.5 py-1 rounded-full text-slate-400 border border-slate-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-key text-[10px]"></i> Configurado
+                </div>
+            </div>
+
+            <!-- AREA DE CHAT DE IA -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 dark-scrollbar flex flex-col">
+                <!-- Mensaje de bienvenida de IA -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 max-w-[90%] self-start relative shadow-lg">
+                    <div class="flex items-center gap-2 mb-2 text-brand-teal text-xs font-bold uppercase tracking-wider">
+                        <i class="fa-solid fa-robot"></i> Copiloto de Producto
+                    </div>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        ¡Hola! Soy tu asistente de diseño conversacional con IA. He cargado la nueva arquitectura para tu bot de loterías.
+                    </p>
+                    <p class="text-sm text-slate-300 leading-relaxed mt-2">
+                        Ahora podemos colaborar en:
+                    </p>
+                    <ul class="text-xs text-slate-400 space-y-1 mt-2 list-disc pl-4">
+                        <li>Diseñar y estructurar flujos detallados de <strong>Promociones y Cross-selling</strong> (Fase 1).</li>
+                        <li>Detallar la capa de <strong>Atención Personalizada</strong> y flujos de alertas de cobro de premios (Fase 2).</li>
+                        <li>Configurar los diagramas de Gantt, milestones y artefactos del plan de trabajo.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ATAJOS DE GENERACIÓN RÁPIDA -->
+            <div class="px-4 py-2 bg-slate-900/50 border-t border-slate-800/80 flex gap-2 overflow-x-auto shrink-0 scrollbar-none">
+                <button onclick="triggerQuickAction('flow-promos')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition flex items-center gap-1">
+                    <i class="fa-solid fa-tag text-brand-teal"></i> Detallar Flujo Promociones
+                </button>
+                <button onclick="triggerQuickAction('flow-alerts')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition flex items-center gap-1">
+                    <i class="fa-solid fa-bell text-brand-teal"></i> Detallar Alertas Premios F2
+                </button>
+                <button onclick="triggerQuickAction('flow-artifacts')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition flex items-center gap-1">
+                    <i class="fa-solid fa-boxes-stacked text-brand-teal"></i> Diseñar Artefactos UX
+                </button>
+            </div>
+
+            <!-- ENTRADA DE TEXTO DE CHAT -->
+            <div class="p-4 border-t border-slate-800 bg-slate-950 shrink-0">
+                <div class="relative flex items-center">
+                    <textarea id="chat-input" rows="1" placeholder="Pídele al copiloto detallar un flujo o añadir módulos..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-4 pr-12 py-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal resize-none dark-scrollbar" onkeydown="handleChatKeydown(event)"></textarea>
+                    <button id="btn-send-message" onclick="sendChatMessage()" class="absolute right-2 top-2 w-8 h-8 bg-brand-teal hover:bg-brand-teallight text-white rounded-lg flex items-center justify-center transition" title="Enviar Mensaje">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                    </button>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-1.5 text-center">
+                    Tus solicitudes nutren las especificaciones del Workspace. Puedes usar los resultados para añadirlos con un clic.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- NOTIFICACIONES Y MODALES PERSONALIZADOS -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-brand-teal border border-teal-500 text-white font-semibold text-sm px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-message">Especificación actualizada con éxito</span>
+    </div>
+
+    <!-- MODAL DE AGREGAR ELEMENTO -->
+    <div id="add-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-md font-bold text-slate-100">Añadir</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-200 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="modal-form-container" class="space-y-4">
+                <!-- Se llena dinámicamente de acuerdo al tipo de elemento -->
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button onclick="closeModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2.5 rounded-lg transition">Cancelar</button>
+                <button id="modal-submit-btn" class="bg-brand-teal hover:bg-brand-teallight text-white text-xs font-bold px-4 py-2.5 rounded-lg transition">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // VARIABLES DE ESTADO LOCAL ACTUALIZADAS SEGÚN REQUERIMIENTOS
+        let projectData = {
+            title: "Asistente Virtual Inteligente – Experiencia Omnicanal Loterías",
+            description: "El proyecto consiste en el diseño, desarrollo e implementación de un Asistente Virtual basado en Inteligencia Artificial Generativa (GenAI) y Procesamiento de Lenguaje Natural (NLP), integrado nativamente en la interfaz de la nueva plataforma web de loterías.",
+            goal: "El objetivo principal es transformar la navegación del usuario en una experiencia guiada, lúdica y sin fricciones. El bot actuará como un copiloto conversacional que acompaña al cliente a lo largo de su customer journey, resolviendo dudas inmediatas en momentos críticos (preventa y postventa) y fomentando la retención.",
+            phases: [
+                {
+                    id: "phase-1",
+                    title: "Fase 1: Asistente de Navegación y Base de Conocimientos",
+                    tag: "Conversational FAQ & Discovery",
+                    type: "Informativa (RAG)",
+                    description: "Esta primera etapa se enfoca en la entrega de valor inmediato mediante un MVP informativo de asistencia guiada, mitigando el volumen de tickets al centro de ayuda físico o telefónico.",
+                    bullets: [
+                        "Guiado de Navegación (Onboarding): Orientación sobre exploración web, localización de sorteos favoritos y flujos de juego.",
+                        "Resolución de Dudas Frecuentes (RAG / Base de Conocimientos): Respuestas ágiles sobre mecánicas, precios, términos y juego seguro.",
+                        "Promociones y Beneficios: Cross-selling con las mejores ofertas vigentes y difusión de las ventajas y beneficios generales de jugar lotería."
+                    ]
+                },
+                {
+                    id: "phase-2",
+                    title: "Fase 2: Asistente Transaccional y Personalizado",
+                    tag: "Authenticated Conversational UX",
+                    type: "Resolutiva (APIs)",
+                    description: "La segunda etapa transforma al bot de un agente informativo a uno resolutivo y transaccional, conectándolo de forma segura con el core de la plataforma a través de APIs de usuario.",
+                    bullets: [
+                        "Gestión de Identidad Conversacional: Soporte en flujos seguros de login y validación de identidad conversacional.",
+                        "Consulta de Cuenta Personalizada: Verificación de boletos jugados, balances, retiros y validación de jugadas.",
+                        "Atención Personalizada: Sugerencia de promociones según su perfil e historial, además de alertas de beneficios y premios por cobrar de forma activa."
+                    ]
+                }
+            ],
+            milestones: [
+                {
+                    id: "ms-1",
+                    phase: "Fase 1",
+                    title: "Hito 1: Descubrimiento y Estrategia Conversacional",
+                    description: "Mapeo completo de intents iniciales y diseño de la personalidad del agente.",
+                    artifacts: ["Árboles de Decisión y Flujos en Figma", "Matriz de Intenciones (Intents) y Entidades"]
+                },
+                {
+                    id: "ms-2",
+                    phase: "Fase 1",
+                    title: "Hito 2: MVP Informativo y Promocional",
+                    description: "Construcción de la base de conocimientos RAG y despliegue del flujo de cross-selling.",
+                    artifacts: ["Base Vectorial de FAQ cargada", "Engine de Promociones Integrado"]
+                },
+                {
+                    id: "ms-3",
+                    phase: "Fase 2",
+                    title: "Hito 3: Integración de Identidad y Seguridad",
+                    description: "Acoplamiento de APIs autenticadas para control seguro de login y registro conversacional.",
+                    artifacts: ["Contrato de API OAuth Conversacional", "Middleware de Encriptación de Sesión"]
+                },
+                {
+                    id: "ms-4",
+                    phase: "Fase 2",
+                    title: "Hito 4: Personalización Transaccional Completa",
+                    description: "Despliegue de motores de recomendación inteligentes y automatización de alertas de cobro.",
+                    artifacts: ["Motor de Perfilado e Historial (Recomendaciones)", "Servicio de Notificación de Premios Pendientes"]
+                }
+            ],
+            ganttTasks: [
+                { id: "gt-1", name: "Estudio de Personas y Diseño de Intents", start: 1, duration: 2, color: "bg-teal-500" },
+                { id: "gt-2", name: "Arquitectura de Diálogos (Figma UX)", start: 2, duration: 3, color: "bg-teal-400" },
+                { id: "gt-3", name: "Carga de Base de Conocimiento y RAG (Fase 1)", start: 4, duration: 3, color: "bg-teal-600" },
+                { id: "gt-4", name: "Motor de Promociones y Cross-Selling", start: 6, duration: 2, color: "bg-emerald-500" },
+                { id: "gt-5", name: "Middleware de Identidad y OAuth (Fase 2)", start: 8, duration: 2, color: "bg-indigo-500" },
+                { id: "gt-6", name: "Integración de Cuenta, Saldos y Premios", start: 9, duration: 3, color: "bg-indigo-400" },
+                { id: "gt-7", name: "QA Funcional, Seguridad y Despliegue", start: 11, duration: 2, color: "bg-teal-500" }
+            ],
+            backlog: [
+                { id: "bl-1", name: "Definir matriz de Intents para Onboarding", status: "done", week: 1, owner: "UX Writer" },
+                { id: "bl-2", name: "Diseñar diálogos de Promociones de Cross-selling", status: "in_progress", week: 3, owner: "Product Owner" },
+                { id: "bl-3", name: "Pruebas de latencia de respuestas RAG", status: "todo", week: 5, owner: "Dev Lead" },
+                { id: "bl-4", name: "Configurar OAuth para Login en Ventana de Chat", status: "todo", week: 8, owner: "Security Engineer" },
+                { id: "bl-5", name: "Integración del Webview de Premios por Cobrar", status: "todo", week: 10, owner: "Frontend Dev" }
+            ],
+            kpis: [
+                { id: "kpi-cr", name: "Incremento del Conversion Rate (CR)", value: 12, unit: "%", desc: "Motivar a usuarios indecisos mediante el flujo dinámico de promociones." },
+                { id: "kpi-deflection", name: "Tasa de Automatización de Soporte", value: 75, unit: "%", desc: "Resolver dudas y canalizar ofertas directas sin saturar el Helpdesk." },
+                { id: "kpi-csat", name: "Mejora de Satisfacción del Cliente (CSAT)", value: 92, unit: "%", desc: "Ofrecer asistencia 24/7 inmediata y eliminar la fricción de navegación." }
+            ],
+            aiModules: []
+        };
+
+        function loadProjectData() {
+            const saved = localStorage.getItem("loterias_ai_project_updated");
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    // Asegurar consistencia de nuevas propiedades
+                    projectData = { ...projectData, ...parsed };
+                } catch (e) {
+                    console.error("Error cargando datos locales:", e);
+                }
+            }
+        }
+
+        function saveProjectToStorage() {
+            localStorage.setItem("loterias_ai_project_updated", JSON.stringify(projectData));
+        }
+
+        function resetToDefaults() {
+            localStorage.removeItem("loterias_ai_project_updated");
+            location.reload();
+        }
+
+        // CONTROL DE TABS
+        function switchTab(tabId) {
+            const tabs = ['tab-specs', 'tab-roadmap', 'tab-milestones', 'tab-gantt', 'tab-kpis'];
+            tabs.forEach(t => {
+                const el = document.getElementById(t);
+                const btn = document.getElementById('btn-' + t);
+                if (t === tabId) {
+                    el.classList.remove('hidden');
+                    btn.classList.add('border-brand-teal', 'text-brand-teal', 'bg-slate-900/50');
+                    btn.classList.remove('border-transparent', 'text-slate-400');
+                } else {
+                    el.classList.add('hidden');
+                    btn.classList.remove('border-brand-teal', 'text-brand-teal', 'bg-slate-900/50');
+                    btn.classList.add('border-transparent', 'text-slate-400');
+                }
+            });
+        }
+
+        // EDICIÓN EN CALIENTE DE DESCRIPCIÓN
+        function toggleEdit(field) {
+            const viewMode = document.getElementById('desc-view-mode');
+            const editMode = document.getElementById('desc-edit-mode');
+            const btnText = document.getElementById('btn-edit-text-desc');
+
+            if (editMode.classList.contains('hidden')) {
+                viewMode.classList.add('hidden');
+                editMode.classList.remove('hidden');
+                btnText.innerText = "Cancelar";
+                
+                document.getElementById('edit-project-title').value = projectData.title;
+                document.getElementById('edit-project-desc').value = projectData.description;
+                document.getElementById('edit-project-goal').value = projectData.goal;
+            } else {
+                viewMode.classList.remove('hidden');
+                editMode.classList.add('hidden');
+                btnText.innerText = "Editar";
+            }
+        }
+
+        function saveDescription() {
+            projectData.title = document.getElementById('edit-project-title').value;
+            projectData.description = document.getElementById('edit-project-desc').value;
+            projectData.goal = document.getElementById('edit-project-goal').value;
+
+            document.getElementById('project-title-display').innerText = projectData.title;
+            document.getElementById('project-desc-display').innerText = projectData.description;
+            document.getElementById('project-goal-display').innerText = projectData.goal;
+
+            toggleEdit();
+            saveProjectToStorage();
+            showToast("Descripción general actualizada con éxito");
+        }
+
+        // RENDERIZACIÓN DINÁMICA DE FASES DEL ROADMAP
+        function renderPhases() {
+            const list = document.getElementById('phases-list');
+            list.innerHTML = '';
+
+            projectData.phases.forEach((phase) => {
+                const card = document.createElement('div');
+                card.className = "bg-brand-card border border-brand-border rounded-2xl p-6 relative transition hover:border-slate-600 shadow-lg";
+                
+                let bulletsHtml = '';
+                phase.bullets.forEach(b => {
+                    bulletsHtml += `
+                        <li class="flex items-start gap-2.5 text-sm text-slate-300">
+                            <span class="text-brand-teal text-xs mt-1 shrink-0"><i class="fa-solid fa-circle-check"></i></span>
+                            <span>${b}</span>
+                        </li>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3 gap-2 flex-wrap md:flex-nowrap">
+                        <div>
+                            <span class="text-xs font-bold text-brand-teal tracking-wider uppercase mb-1 block">${phase.tag}</span>
+                            <h4 class="text-lg font-bold text-slate-100">${phase.title}</h4>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="bg-slate-900 border border-brand-border px-3 py-1 rounded-full text-xs font-semibold text-slate-300 h-fit">${phase.type}</span>
+                            <button onclick="deletePhase('${phase.id}')" class="text-slate-400 hover:text-red-400 p-1 transition" title="Eliminar fase"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-400 mb-4 leading-relaxed">${phase.description}</p>
+                    <ul class="space-y-2 border-t border-slate-800/80 pt-4">
+                        ${bulletsHtml}
+                    </ul>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function deletePhase(id) {
+            projectData.phases = projectData.phases.filter(p => p.id !== id);
+            saveProjectToStorage();
+            renderPhases();
+            showToast("Fase eliminada del Roadmap");
+        }
+
+        // AGREGAR NUEVAS FASES
+        function openAddPhaseModal() {
+            document.getElementById('modal-title').innerText = "Añadir Nueva Fase al Roadmap";
+            const form = document.getElementById('modal-form-container');
+            form.innerHTML = `
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Título de la Fase</label>
+                    <input id="new-phase-title" type="text" placeholder="Ej: Fase 3: Integración de Pagos" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Tag Técnico</label>
+                    <input id="new-phase-tag" type="text" placeholder="Ej: Dynamic Payments Engine" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Tipo de Enfoque</label>
+                    <input id="new-phase-type" type="text" placeholder="Ej: Transaccional Seguro" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Descripción del Objetivo</label>
+                    <textarea id="new-phase-desc" rows="3" placeholder="Describe brevemente la meta de esta fase..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Entregables Clave (Separados por salto de línea)</label>
+                    <textarea id="new-phase-bullets" rows="3" placeholder="Entregable 1&#10;Entregable 2" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal resize-none"></textarea>
+                </div>
+            `;
+            
+            document.getElementById('modal-submit-btn').onclick = submitNewPhase;
+            document.getElementById('add-modal').classList.remove('hidden');
+        }
+
+        function submitNewPhase() {
+            const title = document.getElementById('new-phase-title').value;
+            const tag = document.getElementById('new-phase-tag').value;
+            const type = document.getElementById('new-phase-type').value;
+            const description = document.getElementById('new-phase-desc').value;
+            const bulletsRaw = document.getElementById('new-phase-bullets').value;
+
+            if(!title || !description) {
+                alert("Por favor completa los campos principales de la fase");
+                return;
+            }
+
+            const bullets = bulletsRaw.split('\n').filter(b => b.trim() !== "");
+
+            const newPhase = {
+                id: "phase-" + Date.now(),
+                title,
+                tag: tag || "Conversational UX Add-on",
+                type: type || "Iterativo",
+                description,
+                bullets: bullets.length > 0 ? bullets : ["En definición por arquitectura"]
+            };
+
+            projectData.phases.push(newPhase);
+            saveProjectToStorage();
+            renderPhases();
+            closeModal();
+            showToast("Nueva fase agregada con éxito al Roadmap");
+        }
+
+        // RENDERIZACIÓN DINÁMICA DE MILESTONES & ARTEFACTOS
+        function renderMilestones() {
+            const container = document.getElementById('milestones-container');
+            container.innerHTML = '';
+
+            projectData.milestones.forEach(ms => {
+                const card = document.createElement('div');
+                card.className = "bg-brand-card border border-brand-border rounded-xl p-5 shadow-md flex flex-col justify-between";
+                
+                let artifactsList = '';
+                ms.artifacts.forEach(art => {
+                    artifactsList += `
+                        <div class="flex items-center gap-2 text-xs text-slate-300 bg-slate-950/40 p-2 rounded-lg border border-slate-800">
+                            <i class="fa-solid fa-file-signature text-brand-teal text-[11px]"></i>
+                            <span>${art}</span>
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] font-bold text-brand-teal uppercase tracking-wider bg-teal-500/10 px-2 py-0.5 rounded">${ms.phase}</span>
+                            <button onclick="deleteMilestone('${ms.id}')" class="text-slate-400 hover:text-red-400 p-1 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-100 mb-1">${ms.title}</h4>
+                        <p class="text-xs text-slate-400 mb-4">${ms.description}</p>
+                    </div>
+                    <div class="space-y-2 border-t border-slate-800/80 pt-3">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Artefactos requeridos:</span>
+                        <div class="grid grid-cols-1 gap-2">
+                            ${artifactsList}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function deleteMilestone(id) {
+            projectData.milestones = projectData.milestones.filter(m => m.id !== id);
+            saveProjectToStorage();
+            renderMilestones();
+            showToast("Milestone removido");
+        }
+
+        // RENDERIZACIÓN DINÁMICA DEL CRONOGRAMA GANTT & BACKLOG KANBAN
+        function renderGanttAndBacklog() {
+            // Render Gantt Chart
+            const ganttContainer = document.getElementById('gantt-rows');
+            ganttContainer.innerHTML = '';
+
+            projectData.ganttTasks.forEach(task => {
+                const row = document.createElement('div');
+                row.className = "grid grid-cols-13 gap-2 items-center text-xs";
+                
+                // Celdas de semanas activadas
+                let weeksHtml = '<div class="col-span-12 grid grid-cols-12 gap-1">';
+                for (let w = 1; w <= 12; w++) {
+                    const isActive = w >= task.start && w < (task.start + task.duration);
+                    weeksHtml += `
+                        <div class="h-6 rounded-md ${isActive ? task.color : 'bg-slate-900 border border-slate-800'} transition" 
+                             title="${isActive ? `${task.name}: Semana ${task.start} a ${task.start + task.duration - 1}` : `Semana ${w}`}">
+                        </div>
+                    `;
+                }
+                weeksHtml += '</div>';
+
+                row.innerHTML = `
+                    <div class="col-span-4 font-medium text-slate-300 truncate" title="${task.name}">${task.name}</div>
+                    ${weeksHtml}
+                `;
+                ganttContainer.appendChild(row);
+            });
+
+            // Render Kanban Columns
+            const colTodo = document.getElementById('col-todo');
+            const colProgress = document.getElementById('col-progress');
+            const colDone = document.getElementById('col-done');
+
+            colTodo.innerHTML = '';
+            colProgress.innerHTML = '';
+            colDone.innerHTML = '';
+
+            let counts = { todo: 0, in_progress: 0, done: 0 };
+
+            projectData.backlog.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-brand-card border border-brand-border rounded-xl p-3 shadow hover:border-slate-500 transition cursor-pointer relative group";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[9px] font-bold text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded">Semana ${item.week}</span>
+                        <div class="flex gap-1.5 opacity-0 group-hover:opacity-100 transition">
+                            <button onclick="cycleTaskStatus('${item.id}')" class="text-brand-teallight hover:text-white" title="Cambiar estado"><i class="fa-solid fa-arrows-spin text-xs"></i></button>
+                            <button onclick="deleteBacklogTask('${item.id}')" class="text-slate-400 hover:text-red-400" title="Eliminar"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-200 font-medium mb-2">${item.name}</p>
+                    <div class="flex justify-between items-center text-[10px] text-slate-400">
+                        <span class="truncate"><i class="fa-solid fa-user-circle mr-1"></i>${item.owner}</span>
+                    </div>
+                `;
+
+                if (item.status === 'todo') {
+                    colTodo.appendChild(card);
+                    counts.todo++;
+                } else if (item.status === 'in_progress') {
+                    colProgress.appendChild(card);
+                    counts.in_progress++;
+                } else if (item.status === 'done') {
+                    colDone.appendChild(card);
+                    counts.done++;
+                }
+            });
+
+            // Actualizar contadores
+            document.getElementById('count-todo').innerText = counts.todo;
+            document.getElementById('count-progress').innerText = counts.in_progress;
+            document.getElementById('count-done').innerText = counts.done;
+        }
+
+        function cycleTaskStatus(id) {
+            const task = projectData.backlog.find(t => t.id === id);
+            if (task) {
+                if (task.status === 'todo') task.status = 'in_progress';
+                else if (task.status === 'in_progress') task.status = 'done';
+                else if (task.status === 'done') task.status = 'todo';
+                
+                saveProjectToStorage();
+                renderGanttAndBacklog();
+                showToast("Estado de tarea actualizado");
+            }
+        }
+
+        function deleteBacklogTask(id) {
+            projectData.backlog = projectData.backlog.filter(t => t.id !== id);
+            saveProjectToStorage();
+            renderGanttAndBacklog();
+            showToast("Tarea eliminada del Backlog");
+        }
+
+        // AGREGAR TAREAS AL BACKLOG
+        function openAddTaskModal() {
+            document.getElementById('modal-title').innerText = "Añadir Tarea al Backlog";
+            const form = document.getElementById('modal-form-container');
+            form.innerHTML = `
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nombre de la Tarea / Entregable</label>
+                    <input id="new-task-name" type="text" placeholder="Ej: Definir flujos de cross-selling" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Responsable (Owner)</label>
+                        <input id="new-task-owner" type="text" placeholder="Ej: UX Designer" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Semana Estimada (1-12)</label>
+                        <input id="new-task-week" type="number" min="1" max="12" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modal-submit-btn').onclick = submitNewTask;
+            document.getElementById('add-modal').classList.remove('hidden');
+        }
+
+        function submitNewTask() {
+            const name = document.getElementById('new-task-name').value;
+            const owner = document.getElementById('new-task-owner').value;
+            const week = parseInt(document.getElementById('new-task-week').value);
+
+            if(!name) {
+                alert("Por favor completa el nombre de la tarea");
+                return;
+            }
+
+            const newTask = {
+                id: "bl-" + Date.now(),
+                name,
+                status: "todo",
+                week: week || 1,
+                owner: owner || "Product Owner"
+            };
+
+            projectData.backlog.push(newTask);
+            saveProjectToStorage();
+            renderGanttAndBacklog();
+            closeModal();
+            showToast("Nueva tarea agregada al backlog");
+        }
+
+        // RENDERIZACIÓN DINÁMICA DE KPIS Y OBJETIVOS
+        function renderKPIs() {
+            const grid = document.getElementById('kpi-grid');
+            grid.innerHTML = '';
+
+            projectData.kpis.forEach(kpi => {
+                const card = document.createElement('div');
+                card.className = "bg-brand-card border border-brand-border rounded-2xl p-5 relative transition hover:border-slate-600 shadow-md flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-sm font-bold text-slate-300 leading-tight">${kpi.name}</h4>
+                            <button onclick="deleteKPI('${kpi.id}')" class="text-slate-400 hover:text-red-400 p-1 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-4 leading-relaxed">${kpi.desc}</p>
+                    </div>
+                    <div class="space-y-2 border-t border-slate-800/80 pt-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-400 font-semibold">Valor Objetivo</span>
+                            <span class="text-xl font-black text-brand-teal">${kpi.value}${kpi.unit}</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-brand-teal to-emerald-400 h-2 rounded-full shadow-lg" style="width: ${Math.min(kpi.value, 100)}%"></div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function deleteKPI(id) {
+            projectData.kpis = projectData.kpis.filter(k => k.id !== id);
+            saveProjectToStorage();
+            renderKPIs();
+            showToast("KPI removido de los objetivos");
+        }
+
+        // AGREGAR KPIS
+        function openAddKPIModal() {
+            document.getElementById('modal-title').innerText = "Añadir Nuevo Objetivo de CX / KPIs";
+            const form = document.getElementById('modal-form-container');
+            form.innerHTML = `
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nombre del Indicador</label>
+                    <input id="new-kpi-name" type="text" placeholder="Ej: Reducción del tiempo de respuesta (CSAT)" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Meta Numérica</label>
+                        <input id="new-kpi-val" type="number" placeholder="80" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Unidad de Medida</label>
+                        <input id="new-kpi-unit" type="text" placeholder="%, segundos, etc." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Descripción del Impacto de CX</label>
+                    <textarea id="new-kpi-desc" rows="3" placeholder="Explica cómo impacta esta métrica en la experiencia..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal resize-none"></textarea>
+                </div>
+            `;
+            
+            document.getElementById('modal-submit-btn').onclick = submitNewKPI;
+            document.getElementById('add-modal').classList.remove('hidden');
+        }
+
+        function submitNewKPI() {
+            const name = document.getElementById('new-kpi-name').value;
+            const val = document.getElementById('new-kpi-val').value;
+            const unit = document.getElementById('new-kpi-unit').value;
+            const desc = document.getElementById('new-kpi-desc').value;
+
+            if(!name || !val) {
+                alert("Por favor completa los campos principales de la métrica");
+                return;
+            }
+
+            const newKpi = {
+                id: "kpi-" + Date.now(),
+                name,
+                value: parseFloat(val),
+                unit: unit || "%",
+                desc: desc || "Métrica de rendimiento y satisfacción en definición conversacional."
+            };
+
+            projectData.kpis.push(newKpi);
+            saveProjectToStorage();
+            renderKPIs();
+            closeModal();
+            showToast("Métrica y KPI agregados correctamente");
+        }
+
+        // ACCIONES COMUNES DE UI
+        function closeModal() {
+            document.getElementById('add-modal').classList.add('hidden');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        // SISTEMA DE CHAT CON INTELIGENCIA ARTIFICIAL GEMINI API
+        const apiKey = ""; // Canvas inyectará el token de API automáticamente en ejecución
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+        let chatHistory = [];
+
+        function handleChatKeydown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendChatMessage();
+            }
+        }
+
+        // Generamos un prompt robusto con el contexto de loterías actualizado
+        function buildSystemPrompt() {
+            return `Eres un Líder de Producto, Diseñador de UX y Arquitecto de IA Conversacional experto en plataformas web de Loterías y apuestas.
+Tú y el usuario están colaborando en el diseño del proyecto: "${projectData.title}".
+A continuación te presento los detalles actualizados del Workspace del proyecto en el que están trabajando:
+
+--- ESPECIFICACIONES DE PRODUCTO ACTUALIZADAS ---
+Misión y Descripción:
+${projectData.description}
+
+Objetivos Principales de CX:
+${projectData.goal}
+
+FASES DEL ROADMAP ACTUALIZADAS:
+Fase 1: Asistente de Navegación y Base de Conocimientos (Conversational FAQ & Discovery). Alcance: Onboarding, FAQ con RAG, y Promociones y Beneficios (Cross-selling con ofertas vigentes y difusión de ventajas de jugar lotería).
+Fase 2: Asistente Transaccional y Personalizado (Authenticated Conversational UX). Alcance: Login/Registro seguro conversacional, Consulta de cuenta (Mis jugadas/saldos), y Atención Personalizada (Recomendaciones de promos según perfil/historial, alertas de beneficios y premios por cobrar de forma activa).
+
+MILESTONES Y ARTEFACTOS CLAVE:
+${projectData.milestones.map(m => `- ${m.title} (${m.phase}): ${m.description}. Artefactos: ${m.artifacts.join(', ')}`).join('\n')}
+
+ESTADO DEL BACKLOG (GANTT):
+${projectData.backlog.map(b => `- Tarea: ${b.name}, Estado: ${b.status}, Semana: ${b.week}, Dueño: ${b.owner}`).join('\n')}
+--------------------------------
+
+Tu objetivo es guiar, diseñar flujos de diálogo detallados, sugerir prompts de sistema específicos, o definir contratos API.
+
+REGLAS DE FORMATO DE RESPUESTA CRÍTICAS:
+Cuando diseñes un nuevo flujo de promociones, guías conversacionales o configuraciones de alertas de premios, empaqueta tu propuesta dentro de un bloque especial JSON con formato estándar para que el software del usuario pueda parsearlo e importarlo al tablero de trabajo de forma dinámica con un clic.
+
+El formato JSON debe estructurarse exactamente de esta manera dentro de tu respuesta (puedes ponerlo dentro de un bloque de código markdown con tag 'json-module'):
+
+\`\`\`json-module
+{
+    "title": "Título de la Sección o Módulo Nuevo",
+    "description": "Una descripción clara de lo que cubre esta parte del flujo o entregable.",
+    "content": "Contenido detallado estructurado en markdown, como los pasos detallados de un flujo, el prompt del sistema sugerido, especificaciones técnicas de APIs, etc."
+}
+\`\`\`
+
+Sé amigable, directo, sumamente profesional e interactúa proactivamente.`;
+        }
+
+        async function sendChatMessage(customText = null) {
+            const inputEl = document.getElementById('chat-input');
+            const userMessage = customText || inputEl.value.trim();
+            if (!userMessage) return;
+
+            if (!customText) inputEl.value = '';
+
+            appendMessage("Usuario", userMessage, "bg-slate-900 border border-slate-800 text-slate-100 self-end max-w-[90%] relative");
+
+            const loadingId = "msg-loading-" + Date.now();
+            appendLoadingBubble(loadingId);
+
+            chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+
+            const payloadHistory = [...chatHistory];
+            const systemPrompt = buildSystemPrompt();
+
+            const payload = {
+                contents: payloadHistory,
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                }
+            };
+
+            // Llamada API con Backoff Exponencial
+            let attempt = 0;
+            const maxAttempts = 3;
+            let success = false;
+            let resultText = "";
+
+            while (attempt < maxAttempts && !success) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        resultText = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                        success = true;
+                    } else {
+                        attempt++;
+                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+                    }
+                } catch (err) {
+                    attempt++;
+                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+                }
+            }
+
+            document.getElementById(loadingId).remove();
+
+            if (success && resultText) {
+                chatHistory.push({ role: "model", parts: [{ text: resultText }] });
+                renderAIResponse(resultText);
+            } else {
+                renderMockResponse(userMessage);
+            }
+        }
+
+        function appendMessage(sender, text, classes) {
+            const chatBox = document.getElementById('chat-messages');
+            const bubble = document.createElement('div');
+            bubble.className = `${classes} p-4 rounded-2xl space-y-1 relative shadow-lg`;
+            
+            const senderIcon = sender === "Usuario" ? "fa-solid fa-user-tie" : "fa-solid fa-robot";
+            const senderColor = sender === "Usuario" ? "text-slate-400" : "text-brand-teal";
+
+            bubble.innerHTML = `
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider ${senderColor}">
+                    <i class="${senderIcon}"></i> ${sender}
+                </div>
+                <div class="text-sm leading-relaxed whitespace-pre-wrap">${escapeHTML(text)}</div>
+            `;
+            chatBox.appendChild(bubble);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function appendLoadingBubble(id) {
+            const chatBox = document.getElementById('chat-messages');
+            const bubble = document.createElement('div');
+            bubble.id = id;
+            bubble.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 max-w-[80%] self-start relative shadow-md flex items-center gap-2";
+            bubble.innerHTML = `
+                <i class="fa-solid fa-circle-notch animate-spin text-brand-teal text-sm"></i>
+                <span class="text-xs text-slate-400 font-medium">Copiloto analizando arquitectura conversacional...</span>
+            `;
+            chatBox.appendChild(bubble);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        function renderAIResponse(text) {
+            const chatBox = document.getElementById('chat-messages');
+            const bubble = document.createElement('div');
+            bubble.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 max-w-[90%] self-start relative shadow-lg space-y-2";
+            
+            let mainText = text;
+            let jsonModule = null;
+
+            const jsonBlockRegex = /```json-module([\s\S]*?)```/;
+            const match = text.match(jsonBlockRegex);
+
+            if (match && match[1]) {
+                try {
+                    jsonModule = JSON.parse(match[1].trim());
+                    mainText = text.replace(jsonBlockRegex, '').trim();
+                } catch (e) {
+                    console.error("Error parseando módulo dinámico:", e);
+                }
+            }
+
+            bubble.innerHTML = `
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-brand-teal">
+                    <i class="fa-solid fa-robot"></i> Copiloto de Producto
+                </div>
+                <div class="text-sm leading-relaxed whitespace-pre-wrap">${escapeHTML(mainText)}</div>
+            `;
+
+            if (jsonModule) {
+                const importPanel = document.createElement('div');
+                importPanel.className = "mt-4 p-3.5 bg-slate-950 rounded-xl border border-teal-900/50 flex flex-col gap-2.5 shadow-inner";
+                importPanel.innerHTML = `
+                    <div class="flex items-center gap-2 text-xs font-bold text-slate-200">
+                        <i class="fa-solid fa-wand-magic-sparkles text-brand-teal"></i> ¡Módulo listo para implementar!
+                    </div>
+                    <p class="text-[11px] text-slate-400"><strong>${jsonModule.title}:</strong> ${jsonModule.description}</p>
+                    <button onclick="importAIModule(${JSON.stringify(jsonModule).replace(/"/g, '&quot;')})" class="bg-brand-teal hover:bg-brand-teallight text-white font-bold text-xs py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-md">
+                        <i class="fa-solid fa-circle-plus"></i> Añadir Módulo al Tablero de Trabajo
+                    </button>
+                `;
+                bubble.appendChild(importPanel);
+            }
+
+            chatBox.appendChild(bubble);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // IMPORTAR UN MÓDULO GENERADO POR LA IA AL WORKSPACE
+        function importAIModule(moduleData) {
+            projectData.aiModules.push({
+                id: "module-" + Date.now(),
+                title: moduleData.title,
+                description: moduleData.description,
+                content: moduleData.content
+            });
+
+            saveProjectToStorage();
+            renderAIModules();
+            showToast(`Módulo "${moduleData.title}" añadido al proyecto`);
+            switchTab('tab-specs');
+        }
+
+        function renderAIModules() {
+            const container = document.getElementById('ai-modules-container');
+            const placeholder = document.getElementById('no-modules-placeholder');
+
+            if (projectData.aiModules.length > 0) {
+                placeholder.classList.add('hidden');
+            } else {
+                placeholder.classList.remove('hidden');
+            }
+
+            const cards = container.querySelectorAll('.ai-module-card');
+            cards.forEach(c => c.remove());
+
+            projectData.aiModules.forEach(mod => {
+                const card = document.createElement('div');
+                card.className = "ai-module-card bg-brand-card border border-brand-border rounded-xl p-5 relative group transition hover:border-slate-600 shadow-md";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3 gap-2">
+                        <div>
+                            <h4 class="text-md font-bold text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-book-bookmark text-brand-teal text-sm"></i> ${mod.title}
+                            </h4>
+                            <p class="text-xs text-slate-400 mt-1">${mod.description}</p>
+                        </div>
+                        <button onclick="deleteAIModule('${mod.id}')" class="text-slate-400 hover:text-red-400 p-1 transition"><i class="fa-solid fa-trash-can text-sm"></i></button>
+                    </div>
+                    <div class="bg-slate-950/70 border border-slate-800 rounded-lg p-3 text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto">
+                        ${escapeHTML(mod.content)}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function deleteAIModule(id) {
+            projectData.aiModules = projectData.aiModules.filter(m => m.id !== id);
+            saveProjectToStorage();
+            renderAIModules();
+            showToast("Módulo removido de las especificaciones");
+        }
+
+        // ACCIONES RÁPIDAS DE COPILOTO (ATAJOS)
+        function triggerQuickAction(action) {
+            let prompt = "";
+            switch (action) {
+                case 'flow-promos':
+                    prompt = "Diseña detalladamente el flujo conversacional paso a paso para el módulo de 'Promociones y Beneficios (Cross-selling)' de la Fase 1, indicando cómo ofrecer de manera proactiva las mejores promociones vigentes al cliente.";
+                    break;
+                case 'flow-alerts':
+                    prompt = "Detalla el flujo conversacional de 'Atención Personalizada' en la Fase 2, enfocándote en cómo el bot genera alertas proactivas de premios por cobrar e incentivos basados en el historial del perfil de juego.";
+                    break;
+                case 'flow-artifacts':
+                    prompt = "Describe con detalle los entregables e hitos del proyecto conversacional, indicando cómo estructurar la Matriz de Intents, árboles de decisión en Figma, contratos de API OAuth y motor de recomendaciones.";
+                    break;
+            }
+            sendChatMessage(prompt);
+        }
+
+        // RESPUESTAS DE CONSERVACIÓN (MOCK SYSTEM) ALINEADAS AL NUEVO RETO
+        function renderMockResponse(userInput) {
+            const normalized = userInput.toLowerCase();
+            let mockText = "";
+            let jsonModule = null;
+
+            if (normalized.includes("promociones") || normalized.includes("promo") || normalized.includes("cross")) {
+                mockText = `He diseñado una propuesta estructurada para tu flujo de **Promociones y Beneficios en la Fase 1**. Este flujo fomenta la retención de clientes nuevos y estimula el cross-selling en caliente basándose en los botes activos más jugosos.`;
+                jsonModule = {
+                    title: "Flujo: Promociones y Cross-selling (Fase 1)",
+                    description: "Pasos estructurados para educar en ventajas y proponer la compra de un boleto promocional.",
+                    content: `[PASO 1: DETECCIÓN DE INTERÉS O INACTIVIDAD]
+El usuario entra a la web y el bot, tras 10 segundos de inactividad, activa un globo proactivo:
+Bot: "🎁 ¡Tengo un beneficio especial para ti hoy! ¿Deseas conocer las promociones de esta semana?"
+[Botón: Ver Promociones] [Botón: Jugar ahora]
+
+[PASO 2: DIFUSIÓN DE VENTAJAS Y VALOR]
+Usuario hace clic en 'Ver Promociones'.
+Bot: "🎰 ¡Comprar online es más cómodo y seguro! Disfrutas de:
+• 🏷️ Descuentos en tu primera jugada de MegaLotto.
+• 💳 Cobros instantáneos en cuenta de hasta 2,000 USD.
+• 🔔 Avisos automáticos de resultados a tu correo.
+
+Hoy tenemos el sorteo 'Súper Suerte' con un acumulado histórico de $10 Millones. Si compras un boleto hoy, ¡te regalamos una jugada de cortesía!"
+
+[PASO 3: ENLACE AL CARRITO (CROSS-SELLING)]
+[Botón: Activar Promo y Jugar] [Botón: Ver más beneficios]`
+                };
+            } else if (normalized.includes("atencion") || normalized.includes("alerta") || normalized.includes("premio") || normalized.includes("cobrar")) {
+                mockText = `Excelente, he estructurado el flujo inteligente de **Atención Personalizada y Alertas de Cobro en la Fase 2**, conectando de manera segura el perfil e historial de juego del usuario.`;
+                jsonModule = {
+                    title: "Flujo: Alertas de Premios & Promociones Personalizadas (Fase 2)",
+                    description: "Gestión proactiva una vez que el usuario inicia sesión de forma segura.",
+                    content: `[PASO 1: VALIDACIÓN Y LOGIN CONVERSACIONAL]
+El usuario tiene un token activo de sesión y abre el chat. El bot consulta el middleware.
+Bot: "¡Hola Carlos! 🔮 He revisado tus jugadas recientes y tengo excelentes noticias sobre tu último boleto de MegaLotto:
+
+• Sorteo del: 12 de Julio
+• Estado: ¡Boleto Premiado! 🎉
+• Monto por cobrar: $150.00 USD
+
+Además, en base a tu historial de sorteos favoritos, veo que tu pozo preferido llegó a un récord de $12 Millones. ¿Qué prefieres hacer?"
+
+[PASO 2: ACCIÓN TRANSACCIONAL DIRECTA]
+[Botón: Transferir $150 a mi banco] [Botón: Reinvertir en Súper Suerte] [Botón: Ver detalle del boleto]`
+                };
+            } else {
+                mockText = `He tomado nota de tu solicitud sobre "${userInput}". Para mantener un orden estricto de nuestra hoja de ruta conversacional, he generado una propuesta genérica de especificación que puedes incorporar a tu tablero de control.`;
+                jsonModule = {
+                    title: "Especificación Conversacional: Desarrollo Adicional",
+                    description: `Alcance conceptual construido a partir de: "${userInput}"`,
+                    content: `[ANÁLISIS DE INTERACCIÓN]
+Para dar cobertura a la consulta, se debe definir un flujo con:
+1. Intents y Variaciones de texto enriquecido.
+2. Contrato de API en middleware para sincronizar de forma nativa.
+3. Respuestas de respaldo (Fallbacks) para mitigar la frustración.`
+                };
+            }
+
+            renderAIResponse(mockText);
+        }
+
+        window.onload = function() {
+            loadProjectData();
+            
+            document.getElementById('project-title-display').innerText = projectData.title;
+            document.getElementById('project-desc-display').innerText = projectData.description;
+            document.getElementById('project-goal-display').innerText = projectData.goal;
+
+            renderPhases();
+            renderMilestones();
+            renderGanttAndBacklog();
+            renderKPIs();
+            renderAIModules();
+        }
+    </script>
+</body>
+</html>
