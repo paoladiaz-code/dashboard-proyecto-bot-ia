@@ -117,7 +117,7 @@
             </div>
 
             <!-- CONTENIDO DE TABS -->
-            <div class="flex-1 overflow-y-auto p-6 space-y-6 dark-scrollbar">
+            <div class="flex-1 overflow-y-auto p-6 space-y-6 dark-scrollbar relative">
                 
                 <!-- TAB 1: ESPECIFICACIONES GENERALES -->
                 <div id="tab-specs" class="space-y-6">
@@ -185,7 +185,7 @@
 
                 <!-- TAB 2: ROADMAP DE FASES -->
                 <div id="tab-roadmap" class="hidden space-y-6">
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-center sticky top-0 bg-slate-950/40 backdrop-blur-md pb-4 z-10">
                         <h3 class="text-lg font-bold text-slate-100">Fases del Ecosistema Conversacional</h3>
                         <button onclick="openAddPhaseModal()" class="bg-brand-teal hover:bg-brand-teallight text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
                             <i class="fa-solid fa-plus"></i> Añadir Nueva Fase
