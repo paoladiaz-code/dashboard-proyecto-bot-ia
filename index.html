@@ -1751,52 +1751,35 @@ Sé amigable, directo, sumamente profesional e interactúa proactivamente.`;
                 jsonModule = {
                     title: "Flujo: Promociones y Cross-selling (Fase 1)",
                     description: "Pasos estructurados para educar en ventajas y proponer la compra de un boleto promocional.",
-                    content: `[PASO 1: DETECCIÓN DE INTERÉS O INACTIVIDAD]
-El usuario entra a la web y el bot, tras 10 segundos de inactividad, activa un globo proactivo:
-Bot: "🎁 ¡Tengo un beneficio especial para ti hoy! ¿Deseas conocer las promociones de esta semana?"
-[Botón: Ver Promociones] [Botón: Jugar ahora]
-
-[PASO 2: DIFUSIÓN DE VENTAJAS Y VALOR]
-Usuario hace clic en 'Ver Promociones'.
-Bot: "🎰 ¡Comprar online es más cómodo y seguro! Disfrutas de:
-• 🏷️ Descuentos en tu primera jugada de MegaLotto.
-• 💳 Cobros instantáneos en cuenta de hasta 2,000 USD.
-• 🔔 Avisos automáticos de resultados a tu correo.
-
-Hoy tenemos el sorteo 'Súper Suerte' con un acumulado histórico de $10 Millones. Si compras un boleto hoy, ¡te regalamos una jugada de cortesía!"
-
-[PASO 3: ENLACE AL CARRITO (CROSS-SELLING)]
-[Botón: Activar Promo y Jugar] [Botón: Ver más beneficios]`
+                    content: `[PASO 1: DETECCIÓN DE INTERÉS O INACTIVIDAD]\nEl usuario entra a la web y el bot, tras 10 segundos de inactividad, activa un globo proactivo:\nBot: "🎁 ¡Tengo un beneficio especial para ti hoy! ¿Deseas conocer las promociones de esta semana?"\n[Botón: Ver Promociones] [Botón: Jugar ahora]\n\n[PASO 2: DIFUSIÓN DE VENTAJAS Y VALOR]\nUsuario hace clic en 'Ver Promociones'.\nBot: "🎰 ¡Comprar online es más cómodo y seguro! Disfrutas de:\n• 🏷️ Descuentos en tu primera jugada de MegaLotto.\n• 💳 Cobros instantáneos en cuenta de hasta 2,000 USD.\n• 🔔 Avisos automáticos de resultados a tu correo.\n\nHoy tenemos el sorteo 'Súper Suerte' con un acumulado histórico de $10 Millones. Si compras un boleto hoy, ¡te regalamos una jugada de cortesía!"\n\n[PASO 3: ENLACE AL CARRITO (CROSS-SELLING)]\n[Botón: Activar Promo y Jugar] [Botón: Ver más beneficios]`
                 };
             } else if (normalized.includes("atencion") || normalized.includes("alerta") || normalized.includes("premio") || normalized.includes("cobrar")) {
                 mockText = `Excelente, he estructurado el flujo inteligente de **Atención Personalizada y Alertas de Cobro en la Fase 2**, conectando de manera segura el perfil e historial de juego del usuario.`;
                 jsonModule = {
                     title: "Flujo: Alertas de Premios & Promociones Personalizadas (Fase 2)",
                     description: "Gestión proactiva una vez que el usuario inicia sesión de forma segura.",
-                    content: `[PASO 1: VALIDACIÓN Y LOGIN CONVERSACIONAL]
-El usuario tiene un token activo de sesión y abre el chat. El bot consulta el middleware.
-Bot: "¡Hola Carlos! 🔮 He revisado tus jugadas recientes y tengo excelentes noticias sobre tu último boleto de MegaLotto:
-
-• Sorteo del: 12 de Julio
-• Estado: ¡Boleto Premiado! 🎉
-• Monto por cobrar: $150.00 USD
-
-Además, en base a tu historial de sorteos favoritos, veo que tu pozo preferido llegó a un récord de $12 Millones. ¿Qué prefieres hacer?"
-
-[PASO 2: ACCIÓN TRANSACCIONAL DIRECTA]
-[Botón: Transferir $150 a mi banco] [Botón: Reinvertir en Súper Suerte] [Botón: Ver detalle del boleto]`
+                    content: `[PASO 1: VALIDACIÓN Y LOGIN CONVERSACIONAL]\nEl usuario tiene un token activo de sesión y abre el chat. El bot consulta el middleware.\nBot: "¡Hola Carlos! 🔮 He revisado tus jugadas recientes y tengo excelentes noticias sobre tu último boleto de MegaLotto:\n\n• Sorteo del: 12 de Julio\n• Estado: ¡Boleto Premiado! 🎉\n• Monto por cobrar: $150.00 USD\n\nAdemás, en base a tu historial de sorteos favoritos, veo que tu pozo preferido llegó a un récord de $12 Millones. ¿Qué prefieres hacer?"\n\n[PASO 2: ACCIÓN TRANSACCIONAL DIRECTA]\n[Botón: Transferir $150 a mi banco] [Botón: Reinvertir en Súper Suerte] [Botón: Ver detalle del boleto]`
+                };
+            } else if (normalized.includes("artefactos") || normalized.includes("hitos") || normalized.includes("entregables")) {
+                mockText = `He detallado los artefactos clave requeridos para estructurar la arquitectura conversacional, listos para integrarse al tablero.`;
+                jsonModule = {
+                    title: "Artefactos y Entregables de Arquitectura",
+                    description: "Documentación base para el handover entre diseño (UX) y desarrollo (Dev).",
+                    content: `1. Matriz de Intenciones (Intents): Documento Excel/CSV mapeando las frases de entrenamiento del NLP (ej. "¿gané algo?", "quiero cobrar") con sus entidades (Sorteo, Monto).\n2. Árboles de Decisión (Figma): Diagramas visuales con los caminos felices y fallbacks.\n3. Contratos API: Especificaciones Swagger/OpenAPI para conectar el bot con el CRM de la lotería.\n4. Base Vectorial: Colección de documentos Q&A indexados para el modelo RAG de la Fase 1.`
                 };
             } else {
                 mockText = `He tomado nota de tu solicitud sobre "${userInput}". Para mantener un orden estricto de nuestra hoja de ruta conversacional, he generado una propuesta genérica de especificación que puedes incorporar a tu tablero de control.`;
                 jsonModule = {
                     title: "Especificación Conversacional: Desarrollo Adicional",
                     description: `Alcance conceptual construido a partir de: "${userInput}"`,
-                    content: `[ANÁLISIS DE INTERACCIÓN]
-Para dar cobertura a la consulta, se debe definir un flujo con:
-1. Intents y Variaciones de texto enriquecido.
-2. Contrato de API en middleware para sincronizar de forma nativa.
-3. Respuestas de respaldo (Fallbacks) para mitigar la frustración.`
+                    content: `[ANÁLISIS DE INTERACCIÓN]\nPara dar cobertura a la consulta, se debe definir un flujo con:\n1. Intents y Variaciones de texto enriquecido.\n2. Contrato de API en middleware para sincronizar de forma nativa.\n3. Respuestas de respaldo (Fallbacks) para mitigar la frustración.`
                 };
+            }
+
+            // CORRECCIÓN: Agregar los datos JSON estructurados al texto simulado para que 
+            // la interfaz (renderAIResponse) los detecte y dibuje el botón de "Añadir Módulo"
+            if (jsonModule) {
+                mockText += `\n\n\`\`\`json-module\n${JSON.stringify(jsonModule, null, 2)}\n\`\`\``;
             }
 
             renderAIResponse(mockText);
