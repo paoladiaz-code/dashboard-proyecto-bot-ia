@@ -3,604 +3,1818 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inteligencia de Campañas | Loterías</title>
-    <!-- Tailwind CSS -->
+    <title>Ecosistema de Diseño Conversacional - Loterías IA</title>
+    <!-- Tailwind CSS para diseño moderno y premium -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- ApexCharts -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <!-- Font Awesome para Iconografía fluida -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Biblioteca jsPDF para exportar a PDF (Nueva) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        primary: '#1e3a8a',
-                        secondary: '#3b82f6',
-                        accent: '#10b981',
-                        danger: '#ef4444',
-                        warning: '#f59e0b'
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
                     },
-                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+                    colors: {
+                        brand: {
+                            slate: '#0f172a', /* Slate 900 */
+                            card: '#1e293b',  /* Slate 800 */
+                            teal: '#0d9488',  /* Teal 600 - Menta */
+                            teallight: '#14b8a6', /* Teal 500 */
+                            mintbg: '#f0fdfa', /* Teal 50 */
+                            border: '#334155',  /* Slate 700 */
+                        }
+                    }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        #loader { display: flex; position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #1e3a8a; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        #dashboard-content { display: none; }
-        #empty-state { display: none; }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .dark-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        /* Transiciones fluidas */
+        .tab-transition {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
     </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-900 text-slate-100 font-sans h-screen max-h-screen flex flex-col overflow-hidden">
 
-    <!-- Loader -->
-    <div id="loader">
-        <div class="spinner mb-4"></div>
-        <h2 class="text-xl font-bold text-primary">Conectando con Google Sheets...</h2>
-        <p class="text-slate-500 text-sm mt-2">Descargando y procesando datos en tiempo real</p>
-    </div>
-
-    <header class="glass sticky top-0 z-50 border-b border-slate-200 px-6 py-4 flex flex-wrap gap-4 justify-between items-center">
+    <!-- ENCABEZADO PRINCIPAL DE LA PLATAFORMA -->
+    <header class="bg-slate-950 border-b border-slate-800 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 z-10 shrink-0 shadow-lg">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center text-xl shadow-md">
-                <i class="fa-solid fa-chart-pie"></i>
+            <div class="w-10 h-10 bg-gradient-to-tr from-brand-teal to-emerald-400 rounded-xl flex items-center justify-center text-white text-lg font-bold shadow-md shadow-brand-teal/20 animate-pulse">
+                <i class="fa-solid fa-dice-d20"></i>
             </div>
             <div>
-                <h1 class="text-xl font-bold text-slate-900 leading-tight">Inteligencia de Campañas</h1>
-                <p class="text-xs text-slate-500 font-medium">BI & Analítica de Loterías</p>
+                <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
+                    Loterías IA: Workspace Conversacional
+                </h1>
+                <p class="text-xs text-slate-400 font-medium">Consola de Arquitectura Conversacional & Product Management</p>
             </div>
         </div>
         
-        <!-- Controles Globales -->
-        <div class="flex flex-wrap gap-3 items-center bg-slate-50 p-2 rounded-lg border border-slate-200">
-            <div class="flex flex-col">
-                <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Producto</label>
-                <select id="f-producto" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary outline-none"><option value="ALL">Todos</option></select>
-            </div>
-            <div class="flex flex-col">
-                <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Canal</label>
-                <select id="f-canal" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary outline-none"><option value="ALL">Todos</option></select>
-            </div>
-            <div class="flex flex-col">
-                <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Segmento</label>
-                <select id="f-segmento" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary outline-none"><option value="ALL">Todos</option></select>
-            </div>
-            <div class="flex flex-col">
-                <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Desde</label>
-                <input type="date" id="f-start" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 outline-none">
-            </div>
-            <div class="flex flex-col">
-                <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Hasta</label>
-                <input type="date" id="f-end" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 outline-none">
-            </div>
-            <div class="w-px h-8 bg-slate-300 mx-1"></div>
-            <input type="file" id="fileUpload" accept=".xlsx, .xls" class="hidden">
-            <button onclick="document.getElementById('fileUpload').click()" class="bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold px-3 py-2 rounded-md border border-slate-300 transition-colors" title="Subir archivo manual en caso de que falle Google Sheets">
-                <i class="fa-solid fa-upload"></i> Subir Manual
+        <div class="flex items-center gap-2 flex-wrap md:flex-nowrap">
+            <!-- Botón Compartir / Exportar -->
+            <button onclick="openShareExportModal()" class="bg-brand-teal hover:bg-brand-teallight text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-md shadow-brand-teal/20 transition flex items-center gap-1.5" title="Compartir proyecto o descargar reportes">
+                <i class="fa-solid fa-share-nodes"></i> Compartir / Exportar
+            </button>
+            <button onclick="resetToDefaults()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition flex items-center gap-1.5" title="Restaurar datos iniciales">
+                <i class="fa-solid fa-rotate-left"></i> Restaurar MVP
             </button>
         </div>
     </header>
 
-    <!-- Empty State -->
-    <main id="empty-state" class="flex-1 flex items-center justify-center flex-col text-center p-6">
-        <div class="w-24 h-24 bg-red-50 text-red-300 rounded-full flex items-center justify-center text-4xl mb-6">
-            <i class="fa-solid fa-link-slash"></i>
-        </div>
-        <h2 class="text-2xl font-bold text-slate-700 mb-2">No se pudo conectar a Google Sheets</h2>
-        <p class="text-slate-500 max-w-md mx-auto mb-6">Revisa tu conexión a internet o los permisos del enlace. Mientras tanto, puedes subir el reporte manualmente.</p>
-        <button onclick="document.getElementById('fileUpload').click()" class="bg-primary text-white font-bold px-6 py-3 rounded-lg transition-colors shadow-md hover:bg-blue-800">
-            Seleccionar Archivo Excel
-        </button>
+    <!-- WORKSPACE PRINCIPAL EN REJILLA RESPONSIVA -->
+    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative min-h-0">
+        
+        <!-- PANEL DE CONTROL IZQUIERDO (CONSOLA DE PROYECTO) -->
+        <section class="w-full h-full lg:w-3/5 flex flex-col border-r border-slate-800 bg-slate-950/40 overflow-hidden min-h-0">
+            <!-- Selector de Tabs para organización limpia -->
+            <div class="flex bg-slate-950/80 border-b border-slate-800 shrink-0 overflow-x-auto scrollbar-none">
+                <button onclick="switchTab('tab-specs')" id="btn-tab-specs" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-brand-teal text-brand-teal bg-slate-900/50 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-file-invoice"></i> Especificaciones
+                </button>
+                <button onclick="switchTab('tab-roadmap')" id="btn-tab-roadmap" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/20 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-route"></i> Fases del Roadmap
+                </button>
+                <button onclick="switchTab('tab-milestones')" id="btn-tab-milestones" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/20 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-flag-checkered"></i> Milestones & Artefactos
+                </button>
+                <button onclick="switchTab('tab-gantt')" id="btn-tab-gantt" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/20 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-chart-gantt"></i> Gantt & Backlog
+                </button>
+                <button onclick="switchTab('tab-kpis')" id="btn-tab-kpis" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/20 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-chart-line"></i> Objetivos y KPIs
+                </button>
+            </div>
+
+            <!-- CONTENIDO DE TABS -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-6 dark-scrollbar relative min-h-0">
+                
+                <!-- TAB 1: ESPECIFICACIONES GENERALES -->
+                <div id="tab-specs" class="space-y-6">
+                    <div class="bg-brand-card rounded-2xl border border-brand-border p-6 shadow-xl relative overflow-hidden group">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-brand-teal to-emerald-400"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-2">
+                                <span class="p-1.5 bg-teal-500/10 text-brand-teal rounded-lg"><i class="fa-solid fa-circle-info"></i></span>
+                                <h3 class="text-lg font-bold text-slate-100">Descripción General del Proyecto</h3>
+                            </div>
+                            <button onclick="toggleEdit('project-description')" class="text-xs text-brand-teal hover:text-teal-400 font-semibold flex items-center gap-1 transition">
+                                <i class="fa-solid fa-pen-to-square"></i> <span id="btn-edit-text-desc">Editar</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Texto editable en caliente -->
+                        <div id="desc-view-mode" class="space-y-3">
+                            <h4 id="project-title-display" class="text-xl font-extrabold text-slate-100 tracking-tight">Asistente Virtual Inteligente – Experiencia Omnicanal Loterías</h4>
+                            <p id="project-desc-display" class="text-sm text-slate-300 leading-relaxed">
+                                El proyecto consiste en el diseño, desarrollo e implementación de un Asistente Virtual basado en Inteligencia Artificial Generativa (GenAI) y Procesamiento de Lenguaje Natural (NLP), integrado nativamente en la interfaz de la nueva plataforma web de loterías.
+                            </p>
+                            <p id="project-goal-display" class="text-sm text-slate-300 leading-relaxed">
+                                El objetivo principal es transformar la navegación del usuario en una experiencia guiada, lúdica y sin fricciones. El bot actuará como un copiloto conversacional que acompaña al cliente a lo largo de su customer journey, resolviendo dudas inmediatas en momentos críticos (preventa y postventa) y fomentando la retención.
+                            </p>
+                        </div>
+                        
+                        <!-- Formulario de edición oculto -->
+                        <div id="desc-edit-mode" class="hidden space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Título del Proyecto</label>
+                                <input id="edit-project-title" type="text" class="w-full bg-slate-900 border border-brand-border rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Descripción General</label>
+                                <textarea id="edit-project-desc" rows="3" class="w-full bg-slate-900 border border-brand-border rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal resize-none"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Misión y Objetivos de CX</label>
+                                <textarea id="edit-project-goal" rows="3" class="w-full bg-slate-900 border border-brand-border rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal resize-none"></textarea>
+                            </div>
+                            <div class="flex justify-end gap-2">
+                                <button onclick="saveDescription()" class="bg-brand-teal hover:bg-brand-teallight text-white text-xs font-bold px-3 py-2 rounded-lg transition">Guardar Cambios</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN DINÁMICA: NUEVOS MÓDULOS GENERADOS POR IA -->
+                    <div class="border-t border-slate-800 pt-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-md font-bold text-slate-200 flex items-center gap-2">
+                                <i class="fa-solid fa-folder-plus text-brand-teal"></i> Módulos Adicionales y Flujos Detallados
+                            </h3>
+                            <span class="text-xs bg-slate-800 px-2 py-1 rounded-md text-slate-400 font-medium">Auto-alimentable</span>
+                        </div>
+                        
+                        <div id="ai-modules-container" class="space-y-4">
+                            <!-- Los módulos agregados por el usuario o la IA aparecerán aquí -->
+                            <div id="no-modules-placeholder" class="bg-slate-900/50 rounded-xl border border-dashed border-slate-800 p-8 text-center">
+                                <p class="text-sm text-slate-400">¿Quieres profundizar en un flujo de cobro de premios, promociones o integraciones avanzadas?</p>
+                                <p class="text-xs text-brand-teal mt-2">Pídele a la IA copiloto de la derecha que te ayude a estructurar nuevos módulos y haz clic en "Añadir al Tablero".</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: ROADMAP DE FASES -->
+                <div id="tab-roadmap" class="hidden space-y-6">
+                    <div class="flex justify-between items-center sticky top-0 bg-slate-950/40 backdrop-blur-md pb-4 z-10">
+                        <h3 class="text-lg font-bold text-slate-100">Fases del Ecosistema Conversacional</h3>
+                        <button onclick="openAddPhaseModal()" class="bg-brand-teal hover:bg-brand-teallight text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Añadir Nueva Fase
+                        </button>
+                    </div>
+
+                    <div id="phases-list" class="space-y-6 relative before:absolute before:left-6 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800">
+                        <!-- Las fases del roadmap se renderizan dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- TAB 3: MILESTONES & ARTEFACTOS -->
+                <div id="tab-milestones" class="hidden space-y-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-100">Milestones y Artefactos Requeridos</h3>
+                            <p class="text-xs text-slate-400 mt-1">Estructura clave de entregables para diseño conversacional y arquitectura de software.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="milestones-container">
+                        <!-- Los hitos se renderizan de forma dinámica desde JS -->
+                    </div>
+                </div>
+
+                <!-- TAB 4: GANTT & BACKLOG -->
+                <div id="tab-gantt" class="hidden space-y-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-100">Planificador del Proyecto (Cronograma Gantt)</h3>
+                        <p class="text-xs text-slate-400 mt-1">Gantt interactivo a 12 semanas para las fases de diseño y desarrollo.</p>
+                    </div>
+
+                    <!-- Gantt Chart Container -->
+                    <div class="bg-brand-card border border-brand-border rounded-2xl p-4 overflow-x-auto shadow-xl dark-scrollbar">
+                        <div class="min-w-[700px] space-y-3">
+                            <!-- Gantt Header Weeks -->
+                            <div class="grid grid-cols-13 gap-2 border-b border-slate-700 pb-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <div class="col-span-4 text-left">Tarea / Actividad</div>
+                                <div class="col-span-9 grid grid-cols-12 gap-1">
+                                    <div>S1</div><div>S2</div><div>S3</div><div>S4</div><div>S5</div><div>S6</div>
+                                    <div>S7</div><div>S8</div><div>S9</div><div>S10</div><div>S11</div><div>S12</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Gantt Rows (Generados Dinámicamente) -->
+                            <div id="gantt-rows" class="space-y-3">
+                                <!-- Las filas de tareas se llenan dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Backlog Scrum-like Board -->
+                    <div class="border-t border-slate-800 pt-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="text-md font-bold text-slate-200">Backlog de Tareas del Proyecto</h3>
+                                <p class="text-xs text-slate-400">Arrastra o cambia el estado de los entregables y artefactos.</p>
+                            </div>
+                            <button onclick="openAddTaskModal()" class="bg-brand-teal/20 border border-brand-teal text-brand-teallight px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 hover:bg-brand-teal hover:text-white">
+                                <i class="fa-solid fa-plus"></i> Nueva Tarea
+                            </button>
+                        </div>
+
+                        <!-- Kanban Columns -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="kanban-board">
+                            <!-- Columna 1: Por Hacer -->
+                            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex flex-col min-h-[300px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-xs font-bold text-slate-400 uppercase flex items-center gap-1.5">
+                                        <i class="fa-solid fa-hourglass-start text-amber-500"></i> Backlog
+                                    </span>
+                                    <span id="count-todo" class="text-xs bg-slate-800 px-2 py-0.5 rounded-md text-slate-300">0</span>
+                                </div>
+                                <div id="col-todo" class="space-y-3 flex-1 overflow-y-auto max-h-[350px] dark-scrollbar">
+                                    <!-- Tarjetas de tareas en estado TODO -->
+                                </div>
+                            </div>
+
+                            <!-- Columna 2: En Progreso -->
+                            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex flex-col min-h-[300px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-xs font-bold text-slate-400 uppercase flex items-center gap-1.5">
+                                        <i class="fa-solid fa-gears text-brand-teal animate-spin"></i> En Progreso
+                                    </span>
+                                    <span id="count-progress" class="text-xs bg-slate-800 px-2 py-0.5 rounded-md text-slate-300">0</span>
+                                </div>
+                                <div id="col-progress" class="space-y-3 flex-1 overflow-y-auto max-h-[350px] dark-scrollbar">
+                                    <!-- Tarjetas de tareas en estado PROGRESS -->
+                                </div>
+                            </div>
+
+                            <!-- Columna 3: Completado -->
+                            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex flex-col min-h-[300px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-xs font-bold text-slate-400 uppercase flex items-center gap-1.5">
+                                        <i class="fa-solid fa-circle-check text-emerald-500"></i> Completado
+                                    </span>
+                                    <span id="count-done" class="text-xs bg-slate-800 px-2 py-0.5 rounded-md text-slate-300">0</span>
+                                </div>
+                                <div id="col-done" class="space-y-3 flex-1 overflow-y-auto max-h-[350px] dark-scrollbar">
+                                    <!-- Tarjetas de tareas en estado DONE -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: OBJETIVOS Y KPIS -->
+                <div id="tab-kpis" class="hidden space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-slate-100">Métricas Clave de Rendimiento (KPIs)</h3>
+                        <button onclick="openAddKPIModal()" class="bg-brand-teal hover:bg-brand-teallight text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Añadir Indicador
+                        </button>
+                    </div>
+
+                    <div id="kpi-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Renderización dinámica de indicadores -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PANEL DE COPILOTO CON IA (WORKSPACE DE PRODUCTO DERECHA) -->
+        <section class="w-full h-full lg:w-2/5 flex flex-col bg-slate-950 overflow-hidden relative min-h-0">
+            <div class="p-4 border-b border-slate-800 bg-slate-900/80 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-3 h-3 bg-brand-teal rounded-full animate-ping"></div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-200">Copiloto IA Product Owner</h3>
+                        <p class="text-[10px] text-slate-400">Equipado con los Skills de Experto Conversacional</p>
+                    </div>
+                </div>
+                
+                <!-- Estado de la API -->
+                <div id="api-status" class="text-xs bg-slate-800 px-2.5 py-1 rounded-full text-slate-400 border border-slate-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-key text-[10px]"></i> Configurado
+                </div>
+            </div>
+
+            <!-- AREA DE CHAT DE IA -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 dark-scrollbar flex flex-col min-h-0">
+                <!-- Mensaje de bienvenida de IA -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 max-w-[90%] self-start relative shadow-lg">
+                    <div class="flex items-center gap-2 mb-2 text-brand-teal text-xs font-bold uppercase tracking-wider">
+                        <i class="fa-solid fa-robot"></i> Copiloto de Producto
+                    </div>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        ¡Hola! Soy tu asistente de diseño conversacional con IA. He cargado la nueva arquitectura para tu bot de loterías.
+                    </p>
+                    <p class="text-sm text-slate-300 leading-relaxed mt-2">
+                        Ahora podemos colaborar en:
+                    </p>
+                    <ul class="text-xs text-slate-400 space-y-1 mt-2 list-disc pl-4">
+                        <li>Diseñar y estructurar flujos detallados de <strong>Promociones y Cross-selling</strong> (Fase 1).</li>
+                        <li>Detallar la capa de <strong>Atención Personalizada</strong> y flujos de alertas de cobro de premios (Fase 2).</li>
+                        <li>Configurar los diagramas de Gantt, milestones y artefactos del plan de trabajo.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ATAJOS DE GENERACIÓN RÁPIDA -->
+            <div class="px-4 py-2 bg-slate-900/50 border-t border-slate-800/80 flex gap-2 overflow-x-auto shrink-0 scrollbar-none">
+                <button onclick="triggerQuickAction('flow-promos')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition flex items-center gap-1">
+                    <i class="fa-solid fa-tag text-brand-teal"></i> Detallar Flujo Promociones
+                </button>
+                <button onclick="triggerQuickAction('flow-alerts')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition flex items-center gap-1">
+                    <i class="fa-solid fa-bell text-brand-teal"></i> Detallar Alertas Premios F2
+                </button>
+                <button onclick="triggerQuickAction('flow-artifacts')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition flex items-center gap-1">
+                    <i class="fa-solid fa-boxes-stacked text-brand-teal"></i> Diseñar Artefactos UX
+                </button>
+            </div>
+
+            <!-- ENTRADA DE TEXTO DE CHAT -->
+            <div class="p-4 border-t border-slate-800 bg-slate-950 shrink-0">
+                <div class="relative flex items-center">
+                    <textarea id="chat-input" rows="1" placeholder="Pídele al copiloto detallar un flujo o añadir módulos..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-4 pr-12 py-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal resize-none dark-scrollbar" onkeydown="handleChatKeydown(event)"></textarea>
+                    <button id="btn-send-message" onclick="sendChatMessage()" class="absolute right-2 top-2 w-8 h-8 bg-brand-teal hover:bg-brand-teallight text-white rounded-lg flex items-center justify-center transition" title="Enviar Mensaje">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                    </button>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-1.5 text-center">
+                    Tus solicitudes nutren las especificaciones del Workspace. Puedes usar los resultados para añadirlos con un clic.
+                </p>
+            </div>
+        </section>
     </main>
 
-    <main id="dashboard-content" class="flex-1 p-6 max-w-[1600px] mx-auto w-full flex-col gap-6">
-        
-        <!-- KPIs -->
-        <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-            <div class="card p-5 relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10 text-primary text-5xl"><i class="fa-solid fa-paper-plane"></i></div>
-                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Impacto Global</h3>
-                <div class="text-3xl font-bold text-slate-800" id="kpi-envios">0</div>
-                <div class="mt-2 text-xs font-medium text-slate-500">Volumen filtrado de envíos</div>
-            </div>
-            <div class="card p-5 relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10 text-accent text-5xl"><i class="fa-solid fa-users"></i></div>
-                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Clientes Activos</h3>
-                <div class="text-3xl font-bold text-slate-800" id="kpi-jugadores">0</div>
-                <div class="mt-2 text-xs font-medium text-slate-500">Total redenciones/juego</div>
-            </div>
-            <div class="card p-5 relative overflow-hidden border-l-4 border-l-accent">
-                <div class="absolute top-0 right-0 p-4 opacity-10 text-accent text-5xl"><i class="fa-solid fa-bolt"></i></div>
-                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Tasa de Actividad</h3>
-                <div class="text-3xl font-bold text-accent" id="kpi-tasa">0.00%</div>
-                <div class="mt-2 text-xs font-medium text-slate-500">Conversión ponderada</div>
-            </div>
-            <div class="card p-5 bg-gradient-to-br from-primary to-blue-700 text-white shadow-lg">
-                <h3 class="text-sm font-medium text-blue-200 uppercase tracking-wider mb-1">Producto Estrella</h3>
-                <div class="text-2xl font-bold mb-1 truncate" id="kpi-mix-name">-</div>
-                <div class="flex items-center gap-2 mt-1 bg-white/20 rounded px-2 py-1 w-fit">
-                    <i class="fa-solid fa-star text-yellow-300 text-xs"></i>
-                    <span class="text-sm font-semibold" id="kpi-mix-tasa">0%</span>
-                </div>
-            </div>
-        </section>
+    <!-- NOTIFICACIONES Y MODALES PERSONALIZADOS -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-brand-teal border border-teal-500 text-white font-semibold text-sm px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-message">Especificación actualizada con éxito</span>
+    </div>
 
-        <!-- Insights de Diagnóstico -->
-        <section class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-            <div class="card p-4 border-t-4 border-t-blue-500 bg-blue-50/30">
-                <h4 class="text-xs font-bold text-blue-600 uppercase mb-1"><i class="fa-solid fa-tower-cell mr-1"></i> Mejor Canal</h4>
-                <p class="text-sm text-slate-700 leading-tight" id="insight-canal">Cargando...</p>
+    <!-- MODAL DE AGREGAR ELEMENTO -->
+    <div id="add-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-md font-bold text-slate-100">Añadir</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-200 text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="card p-4 border-t-4 border-t-emerald-500 bg-emerald-50/30">
-                <h4 class="text-xs font-bold text-emerald-600 uppercase mb-1"><i class="fa-solid fa-tags mr-1"></i> Mejor Producto</h4>
-                <p class="text-sm text-slate-700 leading-tight" id="insight-producto">Cargando...</p>
+            <div id="modal-form-container" class="space-y-4">
+                <!-- Se llena dinámicamente de acuerdo al tipo de elemento -->
             </div>
-            <div class="card p-4 border-t-4 border-t-purple-500 bg-purple-50/30">
-                <h4 class="text-xs font-bold text-purple-600 uppercase mb-1"><i class="fa-solid fa-users-viewfinder mr-1"></i> Mejor Segmento</h4>
-                <p class="text-sm text-slate-700 leading-tight" id="insight-segmento">Cargando...</p>
+            <div class="flex justify-end gap-2 mt-6">
+                <button onclick="closeModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2.5 rounded-lg transition">Cancelar</button>
+                <button id="modal-submit-btn" class="bg-brand-teal hover:bg-brand-teallight text-white text-xs font-bold px-4 py-2.5 rounded-lg transition">Guardar</button>
             </div>
-            <div class="card p-4 border-t-4 border-t-warning bg-amber-50/30">
-                <h4 class="text-xs font-bold text-amber-600 uppercase mb-1"><i class="fa-solid fa-comment-dots mr-1"></i> Gatillo de Copy</h4>
-                <p class="text-sm text-slate-700 leading-tight" id="insight-keyword">Cargando...</p>
-            </div>
-        </section>
+        </div>
+    </div>
 
-        <!-- Gráficos Interactivos -->
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <!-- Gráfico Dinámico (Agrupador) -->
-            <div class="card p-6 flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-800">Rendimiento Comparativo</h2>
-                        <p class="text-xs text-slate-500">Ordenado de mayor a menor efectividad</p>
-                    </div>
-                    <div class="flex items-center gap-2 bg-slate-100 p-1 rounded border border-slate-200">
-                        <span class="text-xs font-bold text-slate-500 px-2">Ver por:</span>
-                        <select id="chart-dimension" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary font-medium outline-none">
-                            <option value="canal">Canal</option>
-                            <option value="producto">Producto</option>
-                            <option value="segmento">Segmento</option>
-                            <option value="campaña">Campaña (Top 15)</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="chart-dynamic" class="w-full h-72"></div>
+    <!-- MODAL DE COMPARTIR Y EXPORTAR -->
+    <div id="share-export-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+            <div class="flex justify-between items-center mb-5 border-b border-slate-800 pb-3">
+                <h3 class="text-md font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-share-nodes text-brand-teal"></i> Compartir y Exportar Proyecto
+                </h3>
+                <button onclick="closeShareExportModal()" class="text-slate-400 hover:text-slate-200 text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <!-- Gráfico Evolutivo -->
-            <div class="card p-6 flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-800">Evolución en el Tiempo</h2>
-                        <p class="text-xs text-slate-500">Tendencia de actividad del mix filtrado</p>
-                    </div>
-                    <div class="flex items-center gap-2 bg-slate-100 p-1 rounded border border-slate-200">
-                        <span class="text-xs font-bold text-slate-500 px-2">Agrupar:</span>
-                        <select id="chart-aggregation" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary font-medium outline-none">
-                            <option value="day">Diario</option>
-                            <option value="week">Semanal</option>
-                            <option value="month">Mensual</option>
-                            <option value="quarter">Trimestral</option>
-                            <option value="semester">Semestral</option>
-                            <option value="year">Anual</option>
-                        </select>
+            <div class="space-y-6">
+                <!-- Compartir por URL -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-link text-brand-teal"></i> Compartir enlace dinámico
+                    </h4>
+                    <p class="text-xs text-slate-400">Copia este enlace. Al abrirlo, el destinatario cargará exactamente la configuración y datos actuales de tu Workspace.</p>
+                    <div class="flex gap-2">
+                        <input id="share-link-input" readonly type="text" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-brand-teal font-mono select-all">
+                        <button onclick="copyShareLink()" class="bg-brand-teal hover:bg-brand-teallight text-white font-bold text-xs px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap">
+                            <i class="fa-solid fa-copy"></i> Copiar
+                        </button>
                     </div>
                 </div>
-                <div id="chart-evolution" class="w-full h-72"></div>
-            </div>
-        </section>
 
-        <!-- Tabla Completa de Resultados -->
-        <section class="card p-0 overflow-hidden flex flex-col h-[500px]">
-            <div class="bg-slate-50 p-4 border-b border-slate-200 flex justify-between items-center">
-                <h2 class="text-md font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-table-list text-primary"></i> Auditoría de Resultados (Según Filtros Aplicados)
-                </h2>
-                <span class="text-xs font-medium text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">Ordenado por Tasa de Actividad</span>
+                <!-- Descargar Reportes -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-arrow-down text-brand-teal"></i> Descargar Reportes y Copias
+                    </h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <!-- Botón Descargar JSON -->
+                        <button onclick="downloadJSON()" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 hover:text-white p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition group">
+                            <i class="fa-solid fa-file-code text-2xl text-amber-500 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-xs font-bold block">JSON Backup</span>
+                            <span class="text-[9px] text-slate-400">Guarda todo el estado</span>
+                        </button>
+                        <!-- Botón Descargar Markdown -->
+                        <button onclick="downloadMarkdown()" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 hover:text-white p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition group">
+                            <i class="fa-solid fa-file-word text-2xl text-blue-500 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-xs font-bold block">Markdown (.md)</span>
+                            <span class="text-[9px] text-slate-400">Listo para Confluence</span>
+                        </button>
+                        <!-- Botón Descargar CSV -->
+                        <button onclick="downloadCSV()" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 hover:text-white p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition group">
+                            <i class="fa-solid fa-file-csv text-2xl text-emerald-500 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-xs font-bold block">CSV (Backlog)</span>
+                            <span class="text-[9px] text-slate-400">Para importar a Jira/Excel</span>
+                        </button>
+                        <!-- Botón Descargar Presentación PDF (Nuevo) -->
+                        <button onclick="downloadPDFPresentation()" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 hover:text-white p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition group">
+                            <i class="fa-solid fa-file-pdf text-2xl text-rose-500 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-xs font-bold block">Presentación PDF</span>
+                            <span class="text-[9px] text-slate-400">PDF listo para exponer</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="p-0 overflow-auto flex-1">
-                <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
-                    <thead class="bg-white sticky top-0 shadow-sm z-10">
-                        <tr>
-                            <th class="py-3 px-4 font-bold text-slate-600 border-b">Fecha</th>
-                            <th class="py-3 px-4 font-bold text-slate-600 border-b">Campaña / Mensaje</th>
-                            <th class="py-3 px-4 font-bold text-slate-600 border-b">Producto</th>
-                            <th class="py-3 px-4 font-bold text-slate-600 border-b">Canal</th>
-                            <th class="py-3 px-4 font-bold text-slate-600 border-b">Segmento</th>
-                            <th class="py-3 px-4 font-bold text-slate-600 border-b text-right">Impactos</th>
-                            <th class="py-3 px-4 font-bold text-slate-600 border-b text-right text-accent">Tasa Act.</th>
-                        </tr>
-                    </thead>
-                    <tbody id="mix-table-body" class="divide-y divide-slate-100 bg-slate-50/30">
-                        <!-- Generado por JS -->
-                    </tbody>
-                </table>
+
+            <div class="flex justify-end gap-2 mt-6 pt-3 border-t border-slate-800">
+                <button onclick="closeShareExportModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2.5 rounded-lg transition">Cerrar</button>
             </div>
-        </section>
-    </main>
+        </div>
+    </div>
 
     <script>
-        // Variables Globales de Estado
-        window.allData = [];
-        window.filteredData = [];
-        let dynamicChart = null;
-        let evolutionChart = null;
-
-        const formatNumber = (num) => new Intl.NumberFormat('es-PE').format(num);
-        const formatPercent = (num) => (num * 100).toFixed(2) + '%';
-        const formatDate = (dateString) => {
-            if(!dateString) return '-';
-            const d = new Date(dateString);
-            if (isNaN(d)) return dateString;
-            return d.toISOString().split('T')[0]; // YYYY-MM-DD format
+        // VARIABLES DE ESTADO LOCAL ACTUALIZADAS SEGÚN REQUERIMIENTOS
+        let projectData = {
+            title: "Asistente Virtual Inteligente – Experiencia Omnicanal Loterías",
+            description: "El proyecto consiste en el diseño, desarrollo e implementación de un Asistente Virtual basado en Inteligencia Artificial Generativa (GenAI) y Procesamiento de Lenguaje Natural (NLP), integrado nativamente en la interfaz de la nueva plataforma web de loterías.",
+            goal: "El objetivo principal es transformar la navegación del usuario en una experiencia guiada, lúdica y sin fricciones. El bot actuará como un copiloto conversacional que acompaña al cliente a lo largo de su customer journey, resolviendo dudas inmediatas en momentos críticos (preventa y postventa) y fomentando la retención.",
+            phases: [
+                {
+                    id: "phase-1",
+                    title: "Fase 1: Asistente de Navegación y Base de Conocimientos",
+                    tag: "Conversational FAQ & Discovery",
+                    type: "Informativa (RAG)",
+                    description: "Esta primera etapa se enfoca en la entrega de valor inmediato mediante un MVP informativo de asistencia guiada, mitigando el volumen de tickets al centro de ayuda físico o telefónico.",
+                    bullets: [
+                        "Guiado de Navegación (Onboarding): Orientación sobre exploración web, localización de sorteos favoritos y flujos de juego.",
+                        "Resolución de Dudas Frecuentes (RAG / Base de Conocimientos): Respuestas ágiles sobre mecánicas, precios, términos y juego seguro.",
+                        "Promociones y Beneficios: Cross-selling con las mejores ofertas vigentes y difusión de las ventajas y beneficios generales de jugar lotería."
+                    ]
+                },
+                {
+                    id: "phase-2",
+                    title: "Fase 2: Asistente Transaccional y Personalizado",
+                    tag: "Authenticated Conversational UX",
+                    type: "Resolutiva (APIs)",
+                    description: "La segunda etapa transforma al bot de un agente informativo a uno resolutivo y transaccional, conectándolo de forma segura con el core de la plataforma a través de APIs de usuario.",
+                    bullets: [
+                        "Gestión de Identidad Conversacional: Soporte en flujos seguros de login y validación de identidad conversacional.",
+                        "Consulta de Cuenta Personalizada: Verificación de boletos jugados, balances, retiros y validación de jugadas.",
+                        "Atención Personalizada: Sugerencia de promociones según su perfil e historial, además de alertas de beneficios y premios por cobrar de forma activa."
+                    ]
+                }
+            ],
+            milestones: [
+                {
+                    id: "ms-1",
+                    phase: "Fase 1",
+                    title: "Hito 1: Descubrimiento y Estrategia Conversacional",
+                    description: "Mapeo completo de intents iniciales y diseño de la personalidad del agente.",
+                    artifacts: ["Árboles de Decisión y Flujos en Figma", "Matriz de Intenciones (Intents) y Entidades"]
+                },
+                {
+                    id: "ms-2",
+                    phase: "Fase 1",
+                    title: "Hito 2: MVP Informativo y Promocional",
+                    description: "Construcción de la base de conocimientos RAG y despliegue del flujo de cross-selling.",
+                    artifacts: ["Base Vectorial de FAQ cargada", "Engine de Promociones Integrado"]
+                },
+                {
+                    id: "ms-3",
+                    phase: "Fase 2",
+                    title: "Hito 3: Integración de Identidad y Seguridad",
+                    description: "Acoplamiento de APIs autenticadas para control seguro de login y registro conversacional.",
+                    artifacts: ["Contrato de API OAuth Conversacional", "Middleware de Encriptación de Sesión"]
+                },
+                {
+                    id: "ms-4",
+                    phase: "Fase 2",
+                    title: "Hito 4: Personalización Transaccional Completa",
+                    description: "Despliegue de motores de recomendación inteligentes y automatización de alertas de cobro.",
+                    artifacts: ["Motor de Perfilado e Historial (Recomendaciones)", "Servicio de Notificación de Premios Pendientes"]
+                }
+            ],
+            ganttTasks: [
+                { id: "gt-1", name: "Estudio de Personas y Diseño de Intents", start: 1, duration: 2, color: "bg-teal-500" },
+                { id: "gt-2", name: "Arquitectura de Diálogos (Figma UX)", start: 2, duration: 3, color: "bg-teal-400" },
+                { id: "gt-3", name: "Carga de Base de Conocimiento y RAG (Fase 1)", start: 4, duration: 3, color: "bg-teal-600" },
+                { id: "gt-4", name: "Motor de Promociones y Cross-Selling", start: 6, duration: 2, color: "bg-emerald-500" },
+                { id: "gt-5", name: "Middleware de Identidad y OAuth (Fase 2)", start: 8, duration: 2, color: "bg-indigo-500" },
+                { id: "gt-6", name: "Integración de Cuenta, Saldos y Premios", start: 9, duration: 3, color: "bg-indigo-400" },
+                { id: "gt-7", name: "QA Funcional, Seguridad y Despliegue", start: 11, duration: 2, color: "bg-teal-500" }
+            ],
+            backlog: [
+                { id: "bl-1", name: "Definir matriz de Intents para Onboarding", status: "done", week: 1, owner: "UX Writer" },
+                { id: "bl-2", name: "Diseñar diálogos de Promociones de Cross-selling", status: "in_progress", week: 3, owner: "Product Owner" },
+                { id: "bl-3", name: "Pruebas de latencia de respuestas RAG", status: "todo", week: 5, owner: "Dev Lead" },
+                { id: "bl-4", name: "Configurar OAuth para Login en Ventana de Chat", status: "todo", week: 8, owner: "Security Engineer" },
+                { id: "bl-5", name: "Integración del Webview de Premios por Cobrar", status: "todo", week: 10, owner: "Frontend Dev" }
+            ],
+            kpis: [
+                { id: "kpi-cr", name: "Incremento del Conversion Rate (CR)", value: 12, unit: "%", desc: "Motivar a usuarios indecisos mediante el flujo dinámico de promociones." },
+                { id: "kpi-deflection", name: "Tasa de Automatización de Soporte", value: 75, unit: "%", desc: "Resolver dudas y canalizar ofertas directas sin saturar el Helpdesk." },
+                { id: "kpi-csat", name: "Mejora de Satisfacción del Cliente (CSAT)", value: 92, unit: "%", desc: "Ofrecer asistencia 24/7 inmediata y eliminar la fricción de navegación." }
+            ],
+            aiModules: []
         };
 
-        // --- CONEXIÓN A GOOGLE SHEETS ---
-        // Usamos la URL pública con el sufijo /export?format=xlsx
-        const GSHEETS_URL = "https://docs.google.com/spreadsheets/d/1EaZg4Vzik-4V67dB5S0srP8vMBf36ChYTR3eFwhgNoA/export?format=xlsx";
+        function loadProjectData() {
+            // Verificar primero si hay un proyecto compartido en la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const sharedProject = urlParams.get('project');
+            if (sharedProject) {
+                try {
+                    // Decodificar Base64 de forma robusta para caracteres UTF-8
+                    const parsed = JSON.parse(decodeURIComponent(escape(atob(sharedProject))));
+                    projectData = parsed;
+                    saveProjectToStorage();
+                    // Limpiar la URL para evitar recargas accidentales o URLs excesivamente largas
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    setTimeout(() => {
+                        showToast("¡Proyecto compartido cargado con éxito!");
+                    }, 500);
+                    return;
+                } catch (e) {
+                    console.error("Error al cargar proyecto compartido", e);
+                }
+            }
 
-        document.addEventListener('DOMContentLoaded', fetchFromGoogleSheets);
-
-        async function fetchFromGoogleSheets() {
-            document.getElementById('empty-state').style.display = 'none';
-            document.getElementById('dashboard-content').style.display = 'none';
-            document.getElementById('loader').style.display = 'flex';
-            
-            try {
-                const response = await fetch(GSHEETS_URL);
-                if (!response.ok) throw new Error("Error en red o enlace inválido");
-                const arrayBuffer = await response.arrayBuffer();
-                
-                const workbook = XLSX.read(arrayBuffer, {type: 'array', cellDates: true});
-                let sheetName = workbook.SheetNames.includes('Reporte_Nuevo') ? 'Reporte_Nuevo' : workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
-                
-                processAndStoreData(jsonData);
-            } catch (error) {
-                console.error("Error descargando desde Google Sheets:", error);
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('empty-state').style.display = 'flex';
+            const saved = localStorage.getItem("loterias_ai_project_updated");
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    projectData = { ...projectData, ...parsed };
+                } catch (e) {
+                    console.error("Error cargando datos locales:", e);
+                }
             }
         }
 
-        // --- CARGA MANUAL DE EXCEL (FALLBACK) ---
-        document.getElementById('fileUpload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+        function saveProjectToStorage() {
+            localStorage.setItem("loterias_ai_project_updated", JSON.stringify(projectData));
+        }
 
-            document.getElementById('empty-state').style.display = 'none';
-            document.getElementById('dashboard-content').style.display = 'none';
-            document.getElementById('loader').style.display = 'flex';
+        function resetToDefaults() {
+            localStorage.removeItem("loterias_ai_project_updated");
+            location.reload();
+        }
 
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
-                    const data = new Uint8Array(evt.target.result);
-                    const workbook = XLSX.read(data, {type: 'array', cellDates: true});
-                    let sheetName = workbook.SheetNames.includes('Reporte_Nuevo') ? 'Reporte_Nuevo' : workbook.SheetNames[0];
-                    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {defval: ""});
-                    processAndStoreData(jsonData);
-                } catch (error) {
-                    console.error(error);
-                    document.getElementById('loader').style.display = 'none';
-                    document.getElementById('empty-state').style.display = 'flex';
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        });
-
-        // --- PROCESAMIENTO Y LIMPIEZA DE DATOS ---
-        function processAndStoreData(json) {
-            window.allData = [];
-            let pSet = new Set(), cSet = new Set(), sSet = new Set();
-            let minD = '2099-12-31', maxD = '2000-01-01';
-
-            json.forEach(row => {
-                let envios = parseFloat(row['Total de envíos']) || 0;
-                let jugadores = parseFloat(row['Clientes que jugaron']) || 0;
-                let producto = (row['Producto'] || 'Sin clasificar').toString().trim();
-                let canal = (row['TIPO'] || row['Tipo'] || 'Otro').toString().trim();
-                let segmento = (row['Segmento'] || 'Global').toString().trim();
-                let mensaje = (row['Campaña.1'] || row['Mensaje'] || row['Campaña'] || '').toString().trim();
-                let campañaName = (row['Campaña'] || 'Desconocida').toString().trim();
-                
-                // Parse Date
-                let fechaRaw = row['Fecha de Envío'] || row['Fecha'];
-                let fecha = '';
-                if (fechaRaw instanceof Date) {
-                    fecha = fechaRaw.toISOString().split('T')[0];
-                } else if (fechaRaw) {
-                    let d = new Date(fechaRaw);
-                    if (!isNaN(d)) fecha = d.toISOString().split('T')[0];
-                }
-
-                if (envios > 0) {
-                    window.allData.push({
-                        producto, canal, segmento, mensaje, fecha, campaña: campañaName,
-                        envios, jugadores,
-                        tasa: envios > 0 ? (jugadores / envios) : 0
-                    });
-
-                    pSet.add(producto);
-                    cSet.add(canal);
-                    sSet.add(segmento);
-                    if (fecha) {
-                        if(fecha < minD) minD = fecha;
-                        if(fecha > maxD) maxD = fecha;
-                    }
+        // CONTROL DE TABS
+        function switchTab(tabId) {
+            const tabs = ['tab-specs', 'tab-roadmap', 'tab-milestones', 'tab-gantt', 'tab-kpis'];
+            tabs.forEach(t => {
+                const el = document.getElementById(t);
+                const btn = document.getElementById('btn-' + t);
+                if (t === tabId) {
+                    el.classList.remove('hidden');
+                    btn.classList.add('border-brand-teal', 'text-brand-teal', 'bg-slate-900/50');
+                    btn.classList.remove('border-transparent', 'text-slate-400');
+                } else {
+                    el.classList.add('hidden');
+                    btn.classList.remove('border-brand-teal', 'text-brand-teal', 'bg-slate-900/50');
+                    btn.classList.add('border-transparent', 'text-slate-400');
                 }
             });
+        }
 
-            if(window.allData.length === 0){
-                console.error("No hay datos válidos.");
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('empty-state').style.display = 'flex';
+        // MODALES DE COMPARTIR Y DESCARGAR
+        function openShareExportModal() {
+            const modal = document.getElementById('share-export-modal');
+            const linkInput = document.getElementById('share-link-input');
+            
+            try {
+                // Serializar datos a JSON -> codificar UTF-8 -> codificar Base64
+                const serialized = btoa(unescape(encodeURIComponent(JSON.stringify(projectData))));
+                const shareUrl = window.location.origin + window.location.pathname + "?project=" + serialized;
+                linkInput.value = shareUrl;
+            } catch (e) {
+                console.error("Error al generar link de compartir", e);
+                linkInput.value = window.location.href;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeShareExportModal() {
+            document.getElementById('share-export-modal').classList.add('hidden');
+        }
+
+        function copyShareLink() {
+            const linkInput = document.getElementById('share-link-input');
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999); /* Para móviles */
+            
+            try {
+                // Cumplimiento estricto de la directiva de Clipboard en IFrame
+                document.execCommand('copy');
+                showToast("¡Enlace de compartir copiado al portapapeles!");
+            } catch (err) {
+                console.error("No se pudo copiar con execCommand", err);
+                showToast("Por favor, copia manualmente el enlace seleccionado");
+            }
+        }
+
+        function downloadJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectData, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "proyecto_loterias_ia.json");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast("JSON descargado correctamente");
+        }
+
+        function downloadMarkdown() {
+            let md = `# ${projectData.title}\n\n`;
+            md += `## Descripción\n${projectData.description}\n\n`;
+            md += `## Misión y Objetivos de CX\n${projectData.goal}\n\n`;
+            md += `## Roadmap del Producto\n`;
+            projectData.phases.forEach(p => {
+                md += `### ${p.title} (${p.type})\n*Tag Técnico: ${p.tag}*\n${p.description}\n`;
+                p.bullets.forEach(b => { md += `- ${b}\n`; });
+                md += `\n`;
+            });
+            md += `## Milestones y Artefactos\n`;
+            projectData.milestones.forEach(m => {
+                md += `### ${m.title} (${m.phase})\n${m.description}\n*Artefactos requeridos:* ${m.artifacts.join(', ')}\n\n`;
+            });
+            md += `## Backlog de Trabajo (S1 - S12)\n`;
+            projectData.backlog.forEach(b => {
+                const statusLabel = b.status === 'done' ? '[x] Completado' : b.status === 'in_progress' ? '[/] En Progreso' : '[ ] Pendiente';
+                md += `- ${statusLabel} - Semana ${b.week}: ${b.name} (${b.owner})\n`;
+            });
+            md += `\n## Objetivos y KPIs de Experiencia\n`;
+            projectData.kpis.forEach(k => {
+                md += `- **${k.name}**: Meta ${k.value}${k.unit} - ${k.desc}\n`;
+            });
+
+            const dataStr = "data:text/markdown;charset=utf-8," + encodeURIComponent(md);
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "reporte_proyecto_loterias.md");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast("Reporte en Markdown descargado");
+        }
+
+        function downloadCSV() {
+            let csv = "ID,Tarea,Estado,Semana,Responsable\n";
+            projectData.backlog.forEach(b => {
+                csv += `"${b.id}","${b.name.replace(/"/g, '""')}","${b.status}","${b.week}","${b.owner.replace(/"/g, '""')}"\n`;
+            });
+            const dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "backlog_tareas_loterias.csv");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast("Archivo CSV descargado con éxito");
+        }
+
+        // DESCARGAR PRESENTACIÓN COMO PDF (NUEVO)
+        function downloadPDFPresentation() {
+            try {
+                const { jsPDF } = window.jspdf;
+                // Landscape (apaisado), milímetros, tamaño de página A4
+                const doc = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                // --- SLIDE 1: PORTADA ---
+                doc.setFillColor(15, 23, 42); // Slate 900
+                doc.rect(0, 0, 297, 210, 'F');
+                
+                // Barra de acento
+                doc.setFillColor(13, 148, 136); // Brand Teal
+                doc.rect(20, 45, 4, 120, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(28);
+                doc.text(projectData.title, 35, 70, { maxWidth: 240 });
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(13);
+                doc.setTextColor(148, 163, 184); // Slate 400
+                doc.text(projectData.description, 35, 115, { maxWidth: 230 });
+                
+                doc.setFontSize(11);
+                doc.setTextColor(13, 148, 136); // Teal
+                doc.text("WORKSPACE DE ARQUITECTURA CONVERSACIONAL", 35, 155);
+                
+                // Footer
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
+                doc.text("Página 1", 270, 195);
+
+                // --- SLIDE 2: OBJETIVOS & KPIS ---
+                doc.addPage();
+                doc.setFillColor(248, 250, 252); // Slate 50
+                doc.rect(0, 0, 297, 210, 'F');
+                
+                // Header
+                doc.setFillColor(13, 148, 136);
+                doc.rect(20, 15, 3, 12, 'F');
+                doc.setTextColor(15, 23, 42);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(20);
+                doc.text("Misión Estratégica & KPIs de Experiencia", 28, 24);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(11);
+                doc.setTextColor(71, 85, 105);
+                doc.text(projectData.goal, 20, 40, { maxWidth: 257 });
+                
+                // Dibujar 3 Columnas para KPIs
+                let colW = 79;
+                let gap = 10;
+                projectData.kpis.forEach((kpi, idx) => {
+                    let colX = 20 + idx * (colW + gap);
+                    
+                    // Fondo de tarjeta
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect(colX, 70, colW, 100, 4, 4, 'FD');
+                    
+                    // Barra superior de acento
+                    doc.setFillColor(13, 148, 136);
+                    doc.rect(colX, 70, colW, 1.5, 'F');
+                    
+                    // Título de KPI
+                    doc.setTextColor(15, 23, 42);
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(12);
+                    doc.text(kpi.name, colX + 6, 82, { maxWidth: colW - 12 });
+                    
+                    // Descripción
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(10);
+                    doc.setTextColor(100, 116, 139);
+                    doc.text(kpi.desc, colX + 6, 100, { maxWidth: colW - 12 });
+                    
+                    // Valor
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(32);
+                    doc.setTextColor(13, 148, 136);
+                    doc.text(`${kpi.value}${kpi.unit}`, colX + 6, 155);
+                });
+                
+                // Footer
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
+                doc.text("Página 2", 270, 195);
+
+                // --- SLIDE 3: ROADMAP FASE 1 ---
+                doc.addPage();
+                doc.setFillColor(248, 250, 252);
+                doc.rect(0, 0, 297, 210, 'F');
+                
+                // Header
+                doc.setFillColor(13, 148, 136);
+                doc.rect(20, 15, 3, 12, 'F');
+                doc.setTextColor(15, 23, 42);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(20);
+                doc.text(projectData.phases[0].title, 28, 24);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(11);
+                doc.setTextColor(13, 148, 136);
+                doc.text(`Enfoque técnico: ${projectData.phases[0].tag} | Enfoque de UX: ${projectData.phases[0].type}`, 20, 38);
+                
+                doc.setTextColor(71, 85, 105);
+                doc.setFontSize(11);
+                doc.text(projectData.phases[0].description, 20, 48, { maxWidth: 257 });
+                
+                // Bloque contenedor de bullets
+                doc.setFillColor(255, 255, 255);
+                doc.roundedRect(20, 68, 257, 110, 4, 4, 'FD');
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(12);
+                doc.setTextColor(15, 23, 42);
+                doc.text("Entregables y Pilares de la Fase 1:", 28, 78);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(11);
+                doc.setTextColor(71, 85, 105);
+                
+                projectData.phases[0].bullets.forEach((bullet, bIdx) => {
+                    let textY = 92 + (bIdx * 24);
+                    // Punto de viñeta
+                    doc.setFillColor(13, 148, 136);
+                    doc.circle(30, textY - 1, 1.5, 'F');
+                    
+                    doc.text(bullet, 36, textY, { maxWidth: 230 });
+                });
+                
+                // Footer
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
+                doc.text("Página 3", 270, 195);
+
+                // --- SLIDE 4: ROADMAP FASE 2 ---
+                doc.addPage();
+                doc.setFillColor(248, 250, 252);
+                doc.rect(0, 0, 297, 210, 'F');
+                
+                // Header
+                doc.setFillColor(13, 148, 136);
+                doc.rect(20, 15, 3, 12, 'F');
+                doc.setTextColor(15, 23, 42);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(20);
+                doc.text(projectData.phases[1].title, 28, 24);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(11);
+                doc.setTextColor(13, 148, 136);
+                doc.text(`Enfoque técnico: ${projectData.phases[1].tag} | Enfoque de UX: ${projectData.phases[1].type}`, 20, 38);
+                
+                doc.setTextColor(71, 85, 105);
+                doc.setFontSize(11);
+                doc.text(projectData.phases[1].description, 20, 48, { maxWidth: 257 });
+                
+                // Bloque de bullets
+                doc.setFillColor(255, 255, 255);
+                doc.roundedRect(20, 68, 257, 110, 4, 4, 'FD');
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(12);
+                doc.setTextColor(15, 23, 42);
+                doc.text("Entregables y Pilares de la Fase 2:", 28, 78);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(11);
+                doc.setTextColor(71, 85, 105);
+                
+                projectData.phases[1].bullets.forEach((bullet, bIdx) => {
+                    let textY = 92 + (bIdx * 24);
+                    // Punto de viñeta
+                    doc.setFillColor(13, 148, 136);
+                    doc.circle(30, textY - 1, 1.5, 'F');
+                    
+                    doc.text(bullet, 36, textY, { maxWidth: 230 });
+                });
+                
+                // Footer
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
+                doc.text("Página 4", 270, 195);
+
+                // --- SLIDE 5: MILESTONES & ARTEFACTS ---
+                doc.addPage();
+                doc.setFillColor(248, 250, 252);
+                doc.rect(0, 0, 297, 210, 'F');
+                
+                // Header
+                doc.setFillColor(13, 148, 136);
+                doc.rect(20, 15, 3, 12, 'F');
+                doc.setTextColor(15, 23, 42);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(20);
+                doc.text("Hitos de Arquitectura & Entregables", 28, 24);
+                
+                // Rejilla de hitos
+                let mColW = 123;
+                let mColGap = 11;
+                
+                projectData.milestones.forEach((ms, idx) => {
+                    let colX = 20 + (idx % 2) * (mColW + mColGap);
+                    let rowY = 40 + Math.floor(idx / 2) * 72;
+                    
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect(colX, rowY, mColW, 64, 4, 4, 'FD');
+                    
+                    // Borde lateral del hito
+                    doc.setFillColor(13, 148, 136);
+                    doc.rect(colX, rowY, 1.5, 64, 'F');
+                    
+                    // Fase
+                    doc.setFontSize(8);
+                    doc.setFont("helvetica", "bold");
+                    doc.setTextColor(13, 148, 136);
+                    doc.text(ms.phase.toUpperCase(), colX + 6, rowY + 8);
+                    
+                    // Título del Milestone
+                    doc.setFontSize(11);
+                    doc.setTextColor(15, 23, 42);
+                    doc.text(ms.title, colX + 6, rowY + 16, { maxWidth: mColW - 12 });
+                    
+                    // Descripción
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(9.5);
+                    doc.setTextColor(100, 116, 139);
+                    doc.text(ms.description, colX + 6, rowY + 28, { maxWidth: mColW - 12 });
+                    
+                    // Artefactos
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(8.5);
+                    doc.setTextColor(71, 85, 105);
+                    doc.text(`Entregables: ${ms.artifacts.join(', ')}`, colX + 6, rowY + 54, { maxWidth: mColW - 12 });
+                });
+                
+                // Footer
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
+                doc.text("Página 5", 270, 195);
+
+                // --- SLIDE 6: CRONOGRAMA & BACKLOG ---
+                doc.addPage();
+                doc.setFillColor(248, 250, 252);
+                doc.rect(0, 0, 297, 210, 'F');
+                
+                // Header
+                doc.setFillColor(13, 148, 136);
+                doc.rect(20, 15, 3, 12, 'F');
+                doc.setTextColor(15, 23, 42);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(20);
+                doc.text("Cronograma de Trabajo & Backlog", 28, 24);
+                
+                // Representación de Gantt
+                doc.setFillColor(255, 255, 255);
+                doc.roundedRect(20, 40, 257, 58, 4, 4, 'FD');
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(11);
+                doc.setTextColor(15, 23, 42);
+                doc.text("Fases en el Cronograma de 12 Semanas:", 26, 48);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(9.5);
+                doc.setTextColor(71, 85, 105);
+                doc.text("• Fase 1 - Diseño y RAG base: Semanas 1 a 5 (Estudio de intents, Figma y carga de base vectorial).", 30, 58);
+                doc.text("• Fase 1.5 - Cross-selling & Promociones: Semanas 6 a 7 (Motor de recomendaciones contextuales).", 30, 68);
+                doc.text("• Fase 2 - Autenticación y Conexión Core: Semanas 8 a 12 (Middleware de identidad, APIs transaccionales y cobros).", 30, 78);
+                doc.text("• QA Funcional, Seguridad y Deploy: Semanas 11 a 12.", 30, 88);
+                
+                // Resumen de backlog
+                doc.setFillColor(255, 255, 255);
+                doc.roundedRect(20, 105, 257, 72, 4, 4, 'FD');
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(11);
+                doc.setTextColor(15, 23, 42);
+                doc.text("Estatus del Backlog de Tareas:", 26, 114);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(9.5);
+                doc.setTextColor(71, 85, 105);
+                
+                let backlogTodo = projectData.backlog.filter(t => t.status === 'todo').length;
+                let backlogProgress = projectData.backlog.filter(t => t.status === 'in_progress').length;
+                let backlogDone = projectData.backlog.filter(t => t.status === 'done').length;
+                
+                doc.text(`Total Tareas Planificadas: ${projectData.backlog.length}`, 30, 126);
+                doc.text(`• Pendientes de iniciar (Backlog): ${backlogTodo} tareas`, 30, 136);
+                doc.text(`• En ejecución activa (En Progreso): ${backlogProgress} tareas`, 30, 146);
+                doc.text(`• Validadas y cerradas (Completado): ${backlogDone} tareas`, 30, 156);
+                
+                // Footer
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
+                doc.text("Página 6", 270, 195);
+
+                // Guardar PDF resultante
+                doc.save("Presentacion_Proyecto_Loterias_IA.pdf");
+                showToast("Presentación descargada como PDF");
+            } catch (err) {
+                console.error("Error al exportar PDF:", err);
+                showToast("Hubo un error al generar la presentación PDF");
+            }
+        }
+
+        // EDICIÓN EN CALIENTE DE DESCRIPCIÓN
+        function toggleEdit(field) {
+            const viewMode = document.getElementById('desc-view-mode');
+            const editMode = document.getElementById('desc-edit-mode');
+            const btnText = document.getElementById('btn-edit-text-desc');
+
+            if (editMode.classList.contains('hidden')) {
+                viewMode.classList.add('hidden');
+                editMode.classList.remove('hidden');
+                btnText.innerText = "Cancelar";
+                
+                document.getElementById('edit-project-title').value = projectData.title;
+                document.getElementById('edit-project-desc').value = projectData.description;
+                document.getElementById('edit-project-goal').value = projectData.goal;
+            } else {
+                viewMode.classList.remove('hidden');
+                editMode.classList.add('hidden');
+                btnText.innerText = "Editar";
+            }
+        }
+
+        function saveDescription() {
+            projectData.title = document.getElementById('edit-project-title').value;
+            projectData.description = document.getElementById('edit-project-desc').value;
+            projectData.goal = document.getElementById('edit-project-goal').value;
+
+            document.getElementById('project-title-display').innerText = projectData.title;
+            document.getElementById('project-desc-display').innerText = projectData.description;
+            document.getElementById('project-goal-display').innerText = projectData.goal;
+
+            toggleEdit();
+            saveProjectToStorage();
+            showToast("Descripción general actualizada con éxito");
+        }
+
+        // RENDERIZACIÓN DINÁMICA DE FASES DEL ROADMAP
+        function renderPhases() {
+            const list = document.getElementById('phases-list');
+            list.innerHTML = '';
+
+            projectData.phases.forEach((phase) => {
+                const card = document.createElement('div');
+                card.className = "bg-brand-card border border-brand-border rounded-2xl p-6 relative transition hover:border-slate-600 shadow-lg";
+                
+                let bulletsHtml = '';
+                phase.bullets.forEach(b => {
+                    bulletsHtml += `
+                        <li class="flex items-start gap-2.5 text-sm text-slate-300">
+                            <span class="text-brand-teal text-xs mt-1 shrink-0"><i class="fa-solid fa-circle-check"></i></span>
+                            <span>${b}</span>
+                        </li>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3 gap-2 flex-wrap md:flex-nowrap">
+                        <div>
+                            <span class="text-xs font-bold text-brand-teal tracking-wider uppercase mb-1 block">${phase.tag}</span>
+                            <h4 class="text-lg font-bold text-slate-100">${phase.title}</h4>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="bg-slate-900 border border-brand-border px-3 py-1 rounded-full text-xs font-semibold text-slate-300 h-fit">${phase.type}</span>
+                            <button onclick="deletePhase('${phase.id}')" class="text-slate-400 hover:text-red-400 p-1 transition" title="Eliminar fase"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-400 mb-4 leading-relaxed">${phase.description}</p>
+                    <ul class="space-y-2 border-t border-slate-800/80 pt-4">
+                        ${bulletsHtml}
+                    </ul>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function deletePhase(id) {
+            projectData.phases = projectData.phases.filter(p => p.id !== id);
+            saveProjectToStorage();
+            renderPhases();
+            showToast("Fase eliminada del Roadmap");
+        }
+
+        // AGREGAR NUEVAS FASES
+        function openAddPhaseModal() {
+            document.getElementById('modal-title').innerText = "Añadir Nueva Fase al Roadmap";
+            const form = document.getElementById('modal-form-container');
+            form.innerHTML = `
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Título de la Fase</label>
+                    <input id="new-phase-title" type="text" placeholder="Ej: Fase 3: Integración de Pagos" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Tag Técnico</label>
+                    <input id="new-phase-tag" type="text" placeholder="Ej: Dynamic Payments Engine" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Tipo de Enfoque</label>
+                    <input id="new-phase-type" type="text" placeholder="Ej: Transaccional Seguro" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Descripción del Objetivo</label>
+                    <textarea id="new-phase-desc" rows="3" placeholder="Describe brevemente la meta de esta fase..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Entregables Clave (Separados por salto de línea)</label>
+                    <textarea id="new-phase-bullets" rows="3" placeholder="Entregable 1&#10;Entregable 2" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal resize-none"></textarea>
+                </div>
+            `;
+            
+            document.getElementById('modal-submit-btn').onclick = submitNewPhase;
+            document.getElementById('add-modal').classList.remove('hidden');
+        }
+
+        function submitNewPhase() {
+            const title = document.getElementById('new-phase-title').value;
+            const tag = document.getElementById('new-phase-tag').value;
+            const type = document.getElementById('new-phase-type').value;
+            const description = document.getElementById('new-phase-desc').value;
+            const bulletsRaw = document.getElementById('new-phase-bullets').value;
+
+            if(!title || !description) {
+                showToast("Por favor, completa los campos principales de la fase");
                 return;
             }
 
-            // Poblar Selectores
-            const populate = (id, set) => {
-                const el = document.getElementById(id);
-                el.innerHTML = '<option value="ALL">Todos</option>';
-                [...set].sort().forEach(item => el.innerHTML += `<option value="${item}">${item}</option>`);
-            };
-            populate('f-producto', pSet);
-            populate('f-canal', cSet);
-            populate('f-segmento', sSet);
-            
-            if(minD !== '2099-12-31' && maxD !== '2000-01-01') {
-                document.getElementById('f-start').value = minD;
-                document.getElementById('f-end').value = maxD;
-            }
+            const bullets = bulletsRaw.split('\n').filter(b => b.trim() !== "");
 
-            // Ocultar loader y arrancar
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('dashboard-content').style.display = 'flex';
-            
-            applyFilters();
+            const newPhase = {
+                id: "phase-" + Date.now(),
+                title,
+                tag: tag || "Conversational UX Add-on",
+                type: type || "Iterativo",
+                description,
+                bullets: bullets.length > 0 ? bullets : ["En definición por arquitectura"]
+            };
+
+            projectData.phases.push(newPhase);
+            saveProjectToStorage();
+            renderPhases();
+            closeModal();
+            showToast("Nueva fase agregada al Roadmap");
         }
 
-        function applyFilters() {
-            const fProd = document.getElementById('f-producto').value;
-            const fCanal = document.getElementById('f-canal').value;
-            const fSeg = document.getElementById('f-segmento').value;
-            const fStart = document.getElementById('f-start').value;
-            const fEnd = document.getElementById('f-end').value;
+        // RENDERIZACIÓN DINÁMICA DE MILESTONES & ARTEFACTOS
+        function renderMilestones() {
+            const container = document.getElementById('milestones-container');
+            container.innerHTML = '';
 
-            window.filteredData = window.allData.filter(d => {
-                let match = true;
-                if (fProd !== 'ALL' && d.producto !== fProd) match = false;
-                if (fCanal !== 'ALL' && d.canal !== fCanal) match = false;
-                if (fSeg !== 'ALL' && d.segmento !== fSeg) match = false;
-                if (d.fecha) {
-                    if (fStart && d.fecha < fStart) match = false;
-                    if (fEnd && d.fecha > fEnd) match = false;
+            projectData.milestones.forEach(ms => {
+                const card = document.createElement('div');
+                card.className = "bg-brand-card border border-brand-border rounded-xl p-5 shadow-md flex flex-col justify-between";
+                
+                let artifactsList = '';
+                ms.artifacts.forEach(art => {
+                    artifactsList += `
+                        <div class="flex items-center gap-2 text-xs text-slate-300 bg-slate-950/40 p-2 rounded-lg border border-slate-800">
+                            <i class="fa-solid fa-file-signature text-brand-teal text-[11px]"></i>
+                            <span>${art}</span>
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] font-bold text-brand-teal uppercase tracking-wider bg-teal-500/10 px-2 py-0.5 rounded">${ms.phase}</span>
+                            <button onclick="deleteMilestone('${ms.id}')" class="text-slate-400 hover:text-red-400 p-1 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-100 mb-1">${ms.title}</h4>
+                        <p class="text-xs text-slate-400 mb-4">${ms.description}</p>
+                    </div>
+                    <div class="space-y-2 border-t border-slate-800/80 pt-3">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Artefactos requeridos:</span>
+                        <div class="grid grid-cols-1 gap-2">
+                            ${artifactsList}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function deleteMilestone(id) {
+            projectData.milestones = projectData.milestones.filter(m => m.id !== id);
+            saveProjectToStorage();
+            renderMilestones();
+            showToast("Milestone removido");
+        }
+
+        // RENDERIZACIÓN DINÁMICA DEL CRONOGRAMA GANTT & BACKLOG KANBAN
+        function renderGanttAndBacklog() {
+            // Render Gantt Chart
+            const ganttContainer = document.getElementById('gantt-rows');
+            ganttContainer.innerHTML = '';
+
+            projectData.ganttTasks.forEach(task => {
+                const row = document.createElement('div');
+                row.className = "grid grid-cols-13 gap-2 items-center text-xs";
+                
+                // Celdas de semanas activadas
+                let weeksHtml = '<div class="col-span-12 grid grid-cols-12 gap-1">';
+                for (let w = 1; w <= 12; w++) {
+                    const isActive = w >= task.start && w < (task.start + task.duration);
+                    weeksHtml += `
+                        <div class="h-6 rounded-md ${isActive ? task.color : 'bg-slate-900 border border-slate-800'} transition" 
+                             title="${isActive ? `${task.name}: Semana ${task.start} a ${task.start + task.duration - 1}` : `Semana ${w}`}">
+                        </div>
+                    `;
                 }
-                return match;
+                weeksHtml += '</div>';
+
+                row.innerHTML = `
+                    <div class="col-span-4 font-medium text-slate-300 truncate" title="${task.name}">${task.name}</div>
+                    ${weeksHtml}
+                `;
+                ganttContainer.appendChild(row);
             });
 
-            updateDashboardUI();
+            // Render Kanban Columns
+            const colTodo = document.getElementById('col-todo');
+            const colProgress = document.getElementById('col-progress');
+            const colDone = document.getElementById('col-done');
+
+            colTodo.innerHTML = '';
+            colProgress.innerHTML = '';
+            colDone.innerHTML = '';
+
+            let counts = { todo: 0, in_progress: 0, done: 0 };
+
+            projectData.backlog.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-brand-card border border-brand-border rounded-xl p-3 shadow hover:border-slate-500 transition cursor-pointer relative group";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[9px] font-bold text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded">Semana ${item.week}</span>
+                        <div class="flex gap-1.5 opacity-0 group-hover:opacity-100 transition">
+                            <button onclick="cycleTaskStatus('${item.id}')" class="text-brand-teallight hover:text-white" title="Cambiar estado"><i class="fa-solid fa-arrows-spin text-xs"></i></button>
+                            <button onclick="deleteBacklogTask('${item.id}')" class="text-slate-400 hover:text-red-400" title="Eliminar"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-200 font-medium mb-2">${item.name}</p>
+                    <div class="flex justify-between items-center text-[10px] text-slate-400">
+                        <span class="truncate"><i class="fa-solid fa-user-circle mr-1"></i>${item.owner}</span>
+                    </div>
+                `;
+
+                if (item.status === 'todo') {
+                    colTodo.appendChild(card);
+                    counts.todo++;
+                } else if (item.status === 'in_progress') {
+                    colProgress.appendChild(card);
+                    counts.in_progress++;
+                } else if (item.status === 'done') {
+                    colDone.appendChild(card);
+                    counts.done++;
+                }
+            });
+
+            // Actualizar contadores
+            document.getElementById('count-todo').innerText = counts.todo;
+            document.getElementById('count-progress').innerText = counts.in_progress;
+            document.getElementById('count-done').innerText = counts.done;
         }
 
-        ['f-producto', 'f-canal', 'f-segmento', 'f-start', 'f-end'].forEach(id => {
-            document.getElementById(id).addEventListener('change', applyFilters);
-        });
-        document.getElementById('chart-dimension').addEventListener('change', () => renderDynamicChart());
-        document.getElementById('chart-aggregation').addEventListener('change', () => renderEvolutionChart());
+        function cycleTaskStatus(id) {
+            const task = projectData.backlog.find(t => t.id === id);
+            if (task) {
+                if (task.status === 'todo') task.status = 'in_progress';
+                else if (task.status === 'in_progress') task.status = 'done';
+                else if (task.status === 'done') task.status = 'todo';
+                
+                saveProjectToStorage();
+                renderGanttAndBacklog();
+                showToast("Estado de tarea actualizado");
+            }
+        }
 
-        function updateDashboardUI() {
-            let tEnvios = 0, tJugadores = 0;
-            const dictProd = {}, dictCanal = {}, dictSeg = {};
-            const kwAnalysis = {
-                'Urgencia/Tiempo': { words: ['hoy', 'ahora', 'ya', 'solo por'], e:0, j:0 },
-                'Regalo/Gratis': { words: ['gratis', 'regalo', 'lleva'], e:0, j:0 },
-                'Incentivo Econ.': { words: ['saldo', 'bono', 's/'], e:0, j:0 },
-                'Pozo/Premios': { words: ['pozo', 'millones', 'acumulado'], e:0, j:0 },
+        function deleteBacklogTask(id) {
+            projectData.backlog = projectData.backlog.filter(t => t.id !== id);
+            saveProjectToStorage();
+            renderGanttAndBacklog();
+            showToast("Tarea eliminada del Backlog");
+        }
+
+        // AGREGAR TAREAS AL BACKLOG
+        function openAddTaskModal() {
+            document.getElementById('modal-title').innerText = "Añadir Tarea al Backlog";
+            const form = document.getElementById('modal-form-container');
+            form.innerHTML = `
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nombre de la Tarea / Entregable</label>
+                    <input id="new-task-name" type="text" placeholder="Ej: Definir flujos de cross-selling" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Responsable (Owner)</label>
+                        <input id="new-task-owner" type="text" placeholder="Ej: UX Designer" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Semana Estimada (1-12)</label>
+                        <input id="new-task-week" type="number" min="1" max="12" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modal-submit-btn').onclick = submitNewTask;
+            document.getElementById('add-modal').classList.remove('hidden');
+        }
+
+        function submitNewTask() {
+            const name = document.getElementById('new-task-name').value;
+            const owner = document.getElementById('new-task-owner').value;
+            const week = parseInt(document.getElementById('new-task-week').value);
+
+            if(!name) {
+                showToast("Por favor, completa el nombre de la tarea");
+                return;
+            }
+
+            const newTask = {
+                id: "bl-" + Date.now(),
+                name,
+                status: "todo",
+                week: week || 1,
+                owner: owner || "Product Owner"
             };
 
-            window.filteredData.forEach(r => {
-                tEnvios += r.envios; tJugadores += r.jugadores;
-                
-                if(!dictProd[r.producto]) dictProd[r.producto] = {e:0, j:0};
-                dictProd[r.producto].e += r.envios; dictProd[r.producto].j += r.jugadores;
-                
-                if(!dictCanal[r.canal]) dictCanal[r.canal] = {e:0, j:0};
-                dictCanal[r.canal].e += r.envios; dictCanal[r.canal].j += r.jugadores;
+            projectData.backlog.push(newTask);
+            saveProjectToStorage();
+            renderGanttAndBacklog();
+            closeModal();
+            showToast("Nueva tarea agregada al backlog");
+        }
 
-                if(!dictSeg[r.segmento]) dictSeg[r.segmento] = {e:0, j:0};
-                dictSeg[r.segmento].e += r.envios; dictSeg[r.segmento].j += r.jugadores;
+        // RENDERIZACIÓN DINÁMICA DE KPIS Y OBJETIVOS
+        function renderKPIs() {
+            const grid = document.getElementById('kpi-grid');
+            grid.innerHTML = '';
 
-                let msg = r.mensaje.toLowerCase();
-                for(let cat in kwAnalysis) {
-                    if(kwAnalysis[cat].words.some(w => msg.includes(w))) {
-                        kwAnalysis[cat].e += r.envios; kwAnalysis[cat].j += r.jugadores;
+            projectData.kpis.forEach(kpi => {
+                const card = document.createElement('div');
+                card.className = "bg-brand-card border border-brand-border rounded-2xl p-5 relative transition hover:border-slate-600 shadow-md flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-sm font-bold text-slate-300 leading-tight">${kpi.name}</h4>
+                            <button onclick="deleteKPI('${kpi.id}')" class="text-slate-400 hover:text-red-400 p-1 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-4 leading-relaxed">${kpi.desc}</p>
+                    </div>
+                    <div class="space-y-2 border-t border-slate-800/80 pt-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-400 font-semibold">Valor Objetivo</span>
+                            <span class="text-xl font-black text-brand-teal">${kpi.value}${kpi.unit}</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-brand-teal to-emerald-400 h-2 rounded-full shadow-lg" style="width: ${Math.min(kpi.value, 100)}%"></div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function deleteKPI(id) {
+            projectData.kpis = projectData.kpis.filter(k => k.id !== id);
+            saveProjectToStorage();
+            renderKPIs();
+            showToast("KPI removido de los objetivos");
+        }
+
+        // AGREGAR KPIS
+        function openAddKPIModal() {
+            document.getElementById('modal-title').innerText = "Añadir Nuevo Objetivo de CX / KPIs";
+            const form = document.getElementById('modal-form-container');
+            form.innerHTML = `
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nombre del Indicador</label>
+                    <input id="new-kpi-name" type="text" placeholder="Ej: Reducción del tiempo de respuesta (CSAT)" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Meta Numérica</label>
+                        <input id="new-kpi-val" type="number" placeholder="80" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Unidad de Medida</label>
+                        <input id="new-kpi-unit" type="text" placeholder="%, segundos, etc." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Descripción del Impacto de CX</label>
+                    <textarea id="new-kpi-desc" rows="3" placeholder="Explica cómo impacta esta métrica en la experiencia..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal resize-none"></textarea>
+                </div>
+            `;
+            
+            document.getElementById('modal-submit-btn').onclick = submitNewKPI;
+            document.getElementById('add-modal').classList.remove('hidden');
+        }
+
+        function submitNewKPI() {
+            const name = document.getElementById('new-kpi-name').value;
+            const val = document.getElementById('new-kpi-val').value;
+            const unit = document.getElementById('new-kpi-unit').value;
+            const desc = document.getElementById('new-kpi-desc').value;
+
+            if(!name || !val) {
+                showToast("Por favor, completa los campos principales de la métrica");
+                return;
+            }
+
+            const newKpi = {
+                id: "kpi-" + Date.now(),
+                name,
+                value: parseFloat(val),
+                unit: unit || "%",
+                desc: desc || "Métrica de rendimiento y satisfacción en definición conversacional."
+            };
+
+            projectData.kpis.push(newKpi);
+            saveProjectToStorage();
+            renderKPIs();
+            closeModal();
+            showToast("Métrica y KPI agregados correctamente");
+        }
+
+        // ACCIONES COMUNES DE UI
+        function closeModal() {
+            document.getElementById('add-modal').classList.add('hidden');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        // SISTEMA DE CHAT CON INTELIGENCIA ARTIFICIAL GEMINI API
+        const apiKey = ""; // Canvas inyectará el token de API automáticamente en ejecución
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+        let chatHistory = [];
+
+        function handleChatKeydown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendChatMessage();
+            }
+        }
+
+        // Generamos un prompt robusto con el contexto de loterías actualizado
+        function buildSystemPrompt() {
+            return `Eres un Líder de Producto, Diseñador de UX y Arquitecto de IA Conversacional experto en plataformas web de Loterías y apuestas.
+Tú y el usuario están colaborando en el diseño del proyecto: "${projectData.title}".
+A continuación te presento los detalles actualizados del Workspace del proyecto en el que están trabajando:
+
+--- ESPECIFICACIONES DE PRODUCTO ACTUALIZADAS ---
+Misión y Descripción:
+${projectData.description}
+
+Objetivos Principales de CX:
+${projectData.goal}
+
+FASES DEL ROADMAP ACTUALIZADAS:
+Fase 1: Asistente de Navegación y Base de Conocimientos (Conversational FAQ & Discovery). Alcance: Onboarding, FAQ con RAG, y Promociones y Beneficios (Cross-selling con ofertas vigentes y difusión de ventajas de jugar lotería).
+Fase 2: Asistente Transaccional y Personalizado (Authenticated Conversational UX). Alcance: Login/Registro seguro conversacional, Consulta de cuenta (Mis jugadas/saldos), y Atención Personalizada (Recomendaciones de promos según perfil/historial, alertas de beneficios y premios por cobrar de forma activa).
+
+MILESTONES Y ARTEFACTOS CLAVE:
+${projectData.milestones.map(m => `- ${m.title} (${m.phase}): ${m.description}. Artefactos: ${m.artifacts.join(', ')}`).join('\n')}
+
+ESTADO DEL BACKLOG (GANTT):
+${projectData.backlog.map(b => `- Tarea: ${b.name}, Estado: ${b.status}, Semana: ${b.week}, Dueño: ${b.owner}`).join('\n')}
+--------------------------------
+
+Tu objetivo es guiar, diseñar flujos de diálogo detallados, sugerir prompts de sistema específicos, o definir contratos API.
+
+REGLAS DE FORMATO DE RESPUESTA CRÍTICAS:
+Cuando diseñes un nuevo flujo de promociones, guías conversacionales o configuraciones de alertas de premios, empaqueta tu propuesta dentro de un bloque especial JSON con formato estándar para que el software del usuario pueda parsearlo e importarlo al tablero de trabajo de forma dinámica con un clic.
+
+El formato JSON debe estructurarse exactamente de esta manera dentro de tu respuesta (puedes ponerlo dentro de un bloque de código markdown con tag 'json-module'):
+
+\`\`\`json-module
+{
+    "title": "Título de la Sección o Módulo Nuevo",
+    "description": "Una descripción clara de lo que cubre esta parte del flujo o entregable.",
+    "content": "Contenido detallado estructurado en markdown, como los pasos detallados de un flujo, el prompt del sistema sugerido, especificaciones técnicas de APIs, etc."
+}
+\`\`\`
+
+Sé amigable, directo, sumamente profesional e interactúa proactivamente.`;
+        }
+
+        async function sendChatMessage(customText = null) {
+            const inputEl = document.getElementById('chat-input');
+            const userMessage = customText || inputEl.value.trim();
+            if (!userMessage) return;
+
+            if (!customText) inputEl.value = '';
+
+            appendMessage("Usuario", userMessage, "bg-slate-900 border border-slate-800 text-slate-100 self-end max-w-[90%] relative");
+
+            const loadingId = "msg-loading-" + Date.now();
+            appendLoadingBubble(loadingId);
+
+            chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+
+            const payloadHistory = [...chatHistory];
+            const systemPrompt = buildSystemPrompt();
+
+            const payload = {
+                contents: payloadHistory,
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                }
+            };
+
+            // Llamada API con Backoff Exponencial
+            let attempt = 0;
+            const maxAttempts = 3;
+            let success = false;
+            let resultText = "";
+
+            while (attempt < maxAttempts && !success) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        resultText = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                        success = true;
+                    } else {
+                        attempt++;
+                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
                     }
+                } catch (err) {
+                    attempt++;
+                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
                 }
-            });
-
-            // Update KPIs
-            document.getElementById('kpi-envios').innerText = formatNumber(tEnvios);
-            document.getElementById('kpi-jugadores').innerText = formatNumber(tJugadores);
-            document.getElementById('kpi-tasa').innerText = formatPercent(tEnvios > 0 ? (tJugadores/tEnvios) : 0);
-
-            // Best Mix (Producto Estrella)
-            let bestProd = {n: '-', r:0};
-            for(let p in dictProd) {
-                let r = dictProd[p].e > 500 ? (dictProd[p].j/dictProd[p].e) : 0;
-                if(r > bestProd.r) bestProd = {n: p, r: r};
             }
-            document.getElementById('kpi-mix-name').innerText = bestProd.n;
-            document.getElementById('kpi-mix-tasa').innerText = formatPercent(bestProd.r);
 
-            // Insights
-            const getBest = (dict, minEnvios = 500) => {
-                let best = {n: 'N/A', r: 0};
-                for(let k in dict) {
-                    let r = dict[k].e > minEnvios ? (dict[k].j/dict[k].e) : 0;
-                    if(r > best.r) best = {n: k, r: r};
+            document.getElementById(loadingId).remove();
+
+            if (success && resultText) {
+                chatHistory.push({ role: "model", parts: [{ text: resultText }] });
+                renderAIResponse(resultText);
+            } else {
+                renderMockResponse(userMessage);
+            }
+        }
+
+        function appendMessage(sender, text, classes) {
+            const chatBox = document.getElementById('chat-messages');
+            const bubble = document.createElement('div');
+            bubble.className = `${classes} p-4 rounded-2xl space-y-1 relative shadow-lg`;
+            
+            const senderIcon = sender === "Usuario" ? "fa-solid fa-user-tie" : "fa-solid fa-robot";
+            const senderColor = sender === "Usuario" ? "text-slate-400" : "text-brand-teal";
+
+            bubble.innerHTML = `
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider ${senderColor}">
+                    <i class="${senderIcon}"></i> ${sender}
+                </div>
+                <div class="text-sm leading-relaxed whitespace-pre-wrap">${escapeHTML(text)}</div>
+            `;
+            chatBox.appendChild(bubble);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function appendLoadingBubble(id) {
+            const chatBox = document.getElementById('chat-messages');
+            const bubble = document.createElement('div');
+            bubble.id = id;
+            bubble.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 max-w-[80%] self-start relative shadow-md flex items-center gap-2";
+            bubble.innerHTML = `
+                <i class="fa-solid fa-circle-notch animate-spin text-brand-teal text-sm"></i>
+                <span class="text-xs text-slate-400 font-medium">Copiloto analizando arquitectura conversacional...</span>
+            `;
+            chatBox.appendChild(bubble);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        function renderAIResponse(text) {
+            const chatBox = document.getElementById('chat-messages');
+            const bubble = document.createElement('div');
+            bubble.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 max-w-[90%] self-start relative shadow-lg space-y-2";
+            
+            let mainText = text;
+            let jsonModule = null;
+
+            const jsonBlockRegex = /```json-module([\s\S]*?)```/;
+            const match = text.match(jsonBlockRegex);
+
+            if (match && match[1]) {
+                try {
+                    jsonModule = JSON.parse(match[1].trim());
+                    mainText = text.replace(jsonBlockRegex, '').trim();
+                } catch (e) {
+                    console.error("Error parseando módulo dinámico:", e);
                 }
-                return best;
             }
-            
-            let topC = getBest(dictCanal);
-            let topS = getBest(dictSeg);
-            let topK = getBest(kwAnalysis, 100);
 
-            document.getElementById('insight-canal').innerHTML = topC.r > 0 ? `<b>${topC.n}</b> logra la mayor retención (${formatPercent(topC.r)}). Priorizar para envíos core.` : 'Datos insuficientes.';
-            document.getElementById('insight-producto').innerHTML = bestProd.r > 0 ? `<b>${bestProd.n}</b> es el motor actual. Apoyar con triggers.` : 'Datos insuficientes.';
-            document.getElementById('insight-segmento').innerHTML = topS.r > 0 ? `<b>${topS.n}</b> es el más responsivo (${formatPercent(topS.r)}).` : 'Datos insuficientes.';
-            document.getElementById('insight-keyword').innerHTML = topK.r > 0 ? `Conceptos de <b>${topK.n}</b> logran ${formatPercent(topK.r)} de actividad.` : 'Sin patrones de copy fuertes.';
+            bubble.innerHTML = `
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-brand-teal">
+                    <i class="fa-solid fa-robot"></i> Copiloto de Producto
+                </div>
+                <div class="text-sm leading-relaxed whitespace-pre-wrap">${escapeHTML(mainText)}</div>
+            `;
 
-            renderDynamicChart();
-            renderEvolutionChart();
-            renderMixTable();
-        }
-
-        function renderDynamicChart() {
-            const dim = document.getElementById('chart-dimension').value;
-            const groupMap = {};
-            
-            window.filteredData.forEach(r => {
-                let key = r[dim];
-                if(dim === 'campaña' && !key) key = 'Sin Nombre';
-                if(!groupMap[key]) groupMap[key] = {e:0, j:0};
-                groupMap[key].e += r.envios;
-                groupMap[key].j += r.jugadores;
-            });
-
-            // Calcular tasa y ordenar de mayor a menor
-            let sortedArr = Object.keys(groupMap).map(k => {
-                return { name: k, rate: groupMap[k].e > 0 ? (groupMap[k].j / groupMap[k].e * 100) : 0, vol: groupMap[k].e };
-            }).filter(item => item.vol > 0).sort((a, b) => b.rate - a.rate);
-
-            if (dim === 'campaña') sortedArr = sortedArr.slice(0, 15); // Top 15 para campañas
-
-            const categories = sortedArr.map(i => i.name.length > 25 ? i.name.substring(0,25)+'...' : i.name);
-            const seriesData = sortedArr.map(i => i.rate.toFixed(2));
-
-            if(dynamicChart) dynamicChart.destroy();
-
-            const options = {
-                series: [{ name: 'Efectividad (%)', data: seriesData }],
-                chart: { type: 'bar', height: '100%', toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
-                plotOptions: { bar: { borderRadius: 4, horizontal: true, dataLabels: { position: 'top' }, distributed: true } },
-                colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f43f5e'], // Paleta dinámica
-                dataLabels: { enabled: true, offsetX: 30, style: { fontSize: '11px', colors: ['#475569'] }, formatter: (val) => val + "%" },
-                xaxis: { categories: categories, labels: { show: false } },
-                legend: { show: false },
-                grid: { strokeDashArray: 4, borderColor: '#e2e8f0', xaxis: {lines: {show: true}}, yaxis: {lines: {show: false}} }
-            };
-
-            dynamicChart = new ApexCharts(document.querySelector("#chart-dynamic"), options);
-            dynamicChart.render();
-        }
-
-        function getAggregatedDate(dateStr, interval) {
-            if (!dateStr) return 'Desc';
-            const dObj = new Date(dateStr);
-            if(isNaN(dObj)) return dateStr;
-            const y = dObj.getUTCFullYear();
-            const m = dObj.getUTCMonth() + 1;
-            const d = dObj.getUTCDate();
-            
-            const ms = m.toString().padStart(2, '0');
-            const ds = d.toString().padStart(2, '0');
-
-            switch (interval) {
-                case 'day': return `${y}-${ms}-${ds}`;
-                case 'week':
-                    const start = new Date(Date.UTC(y, 0, 1));
-                    const diff = (dObj - start) / 86400000;
-                    const w = Math.ceil((diff + start.getUTCDay() + 1) / 7);
-                    return `${y}-W${w.toString().padStart(2,'0')}`;
-                case 'month': return `${y}-${ms}`;
-                case 'quarter': return `${y}-Q${Math.ceil(m / 3)}`;
-                case 'semester': return `${y}-S${m <= 6 ? 1 : 2}`;
-                case 'year': return `${y}`;
-                default: return dateStr;
+            if (jsonModule) {
+                const importPanel = document.createElement('div');
+                importPanel.className = "mt-4 p-3.5 bg-slate-950 rounded-xl border border-teal-900/50 flex flex-col gap-2.5 shadow-inner";
+                importPanel.innerHTML = `
+                    <div class="flex items-center gap-2 text-xs font-bold text-slate-200">
+                        <i class="fa-solid fa-wand-magic-sparkles text-brand-teal"></i> ¡Módulo listo para implementar!
+                    </div>
+                    <p class="text-[11px] text-slate-400"><strong>${jsonModule.title}:</strong> ${jsonModule.description}</p>
+                    <button onclick="importAIModule(${JSON.stringify(jsonModule).replace(/"/g, '&quot;')})" class="bg-brand-teal hover:bg-brand-teallight text-white font-bold text-xs py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-md">
+                        <i class="fa-solid fa-circle-plus"></i> Añadir Módulo al Tablero de Trabajo
+                    </button>
+                `;
+                bubble.appendChild(importPanel);
             }
+
+            chatBox.appendChild(bubble);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function renderEvolutionChart() {
-            const interval = document.getElementById('chart-aggregation').value;
-            const groupMap = {};
-
-            window.filteredData.forEach(r => {
-                if(!r.fecha) return;
-                let aggDate = getAggregatedDate(r.fecha, interval);
-                if(!groupMap[aggDate]) groupMap[aggDate] = {e:0, j:0};
-                groupMap[aggDate].e += r.envios;
-                groupMap[aggDate].j += r.jugadores;
+        // IMPORTAR UN MÓDULO GENERADO POR LA IA AL WORKSPACE
+        function importAIModule(moduleData) {
+            projectData.aiModules.push({
+                id: "module-" + Date.now(),
+                title: moduleData.title,
+                description: moduleData.description,
+                content: moduleData.content
             });
 
-            // Ordenar cronológicamente
-            let sortedKeys = Object.keys(groupMap).sort();
-            
-            const categories = sortedKeys;
-            const seriesData = sortedKeys.map(k => {
-                return groupMap[k].e > 0 ? (groupMap[k].j / groupMap[k].e * 100).toFixed(2) : 0;
+            saveProjectToStorage();
+            renderAIModules();
+            showToast(`Módulo "${moduleData.title}" añadido al proyecto`);
+            switchTab('tab-specs');
+        }
+
+        function renderAIModules() {
+            const container = document.getElementById('ai-modules-container');
+            const placeholder = document.getElementById('no-modules-placeholder');
+
+            if (projectData.aiModules.length > 0) {
+                placeholder.classList.add('hidden');
+            } else {
+                placeholder.classList.remove('hidden');
+            }
+
+            const cards = container.querySelectorAll('.ai-module-card');
+            cards.forEach(c => c.remove());
+
+            projectData.aiModules.forEach(mod => {
+                const card = document.createElement('div');
+                card.className = "ai-module-card bg-brand-card border border-brand-border rounded-xl p-5 relative group transition hover:border-slate-600 shadow-md";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3 gap-2">
+                        <div>
+                            <h4 class="text-md font-bold text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-book-bookmark text-brand-teal text-sm"></i> ${mod.title}
+                            </h4>
+                            <p class="text-xs text-slate-400 mt-1">${mod.description}</p>
+                        </div>
+                        <button onclick="deleteAIModule('${mod.id}')" class="text-slate-400 hover:text-red-400 p-1 transition"><i class="fa-solid fa-trash-can text-sm"></i></button>
+                    </div>
+                    <div class="bg-slate-950/70 border border-slate-800 rounded-lg p-3 text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto">
+                        ${escapeHTML(mod.content)}
+                    </div>
+                `;
+                container.appendChild(card);
             });
-
-            if(evolutionChart) evolutionChart.destroy();
-
-            const options = {
-                series: [{ name: 'Efectividad Promedio', data: seriesData }],
-                chart: { type: 'area', height: '100%', toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
-                colors: ['#10b981'], // Verde para evolución
-                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 100] } },
-                dataLabels: { enabled: false },
-                stroke: { curve: 'smooth', width: 3 },
-                xaxis: { categories: categories, tooltip: { enabled: false } },
-                yaxis: { labels: { formatter: function(val) { return val + "%" } } },
-                tooltip: { y: { formatter: function(val) { return val + "%" } } },
-                grid: { strokeDashArray: 4, borderColor: '#e2e8f0', padding: {left: 10, right: 20} },
-                markers: { size: 4, colors: ['#fff'], strokeColors: '#10b981', strokeWidth: 2, hover: { size: 6 } }
-            };
-
-            evolutionChart = new ApexCharts(document.querySelector("#chart-evolution"), options);
-            evolutionChart.render();
         }
 
-        function renderMixTable() {
-            // Clonar y ordenar por tasa de mayor a menor
-            const sortedData = [...window.filteredData].sort((a,b) => b.tasa - a.tasa);
-            
-            const tableHtml = sortedData.map(r => `
-                <tr class="hover:bg-white transition-colors border-b border-slate-100 last:border-0">
-                    <td class="py-3 px-4 text-slate-500 font-medium">${formatDate(r.fecha)}</td>
-                    <td class="py-3 px-4">
-                        <div class="text-slate-800 font-semibold truncate max-w-xs" title="${r.campaña}">${r.campaña}</div>
-                        <div class="text-slate-400 text-xs truncate max-w-xs" title="${r.mensaje}">${r.mensaje.substring(0, 50)}...</div>
-                    </td>
-                    <td class="py-3 px-4 font-medium text-slate-700">${r.producto}</td>
-                    <td class="py-3 px-4"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs border border-blue-100 font-semibold">${r.canal}</span></td>
-                    <td class="py-3 px-4"><span class="bg-purple-50 text-purple-600 px-2 py-1 rounded text-xs border border-purple-100 font-medium">${r.segmento}</span></td>
-                    <td class="py-3 px-4 text-right text-slate-600 font-medium">${formatNumber(r.envios)}</td>
-                    <td class="py-3 px-4 text-right font-bold text-accent">${formatPercent(r.tasa)}</td>
-                </tr>
-            `).join('');
-            
-            const tbody = document.getElementById('mix-table-body');
-            tbody.innerHTML = tableHtml || `<tr><td colspan="7" class="py-8 text-center text-slate-400 font-medium">No hay registros para la combinación de filtros seleccionada.</td></tr>`;
+        function deleteAIModule(id) {
+            projectData.aiModules = projectData.aiModules.filter(m => m.id !== id);
+            saveProjectToStorage();
+            renderAIModules();
+            showToast("Módulo removido de las especificaciones");
         }
 
+        // ACCIONES RÁPIDAS DE COPILOTO (ATAJOS)
+        function triggerQuickAction(action) {
+            let prompt = "";
+            switch (action) {
+                case 'flow-promos':
+                    prompt = "Diseña detalladamente el flujo conversacional paso a paso para el módulo de 'Promociones y Beneficios (Cross-selling)' de la Fase 1, indicando cómo ofrecer de manera proactiva las mejores promociones vigentes al cliente.";
+                    break;
+                case 'flow-alerts':
+                    prompt = "Detalla el flujo conversacional de 'Atención Personalizada' en la Fase 2, enfocándote en cómo el bot genera alertas proactivas de premios por cobrar e incentivos basados en el historial del perfil de juego.";
+                    break;
+                case 'flow-artifacts':
+                    prompt = "Describe con detalle los entregables e hitos del proyecto conversacional, indicando cómo estructurar la Matriz de Intents, árboles de decisión en Figma, contratos de API OAuth y motor de recomendaciones.";
+                    break;
+            }
+            sendChatMessage(prompt);
+        }
+
+        // RESPUESTAS DE CONSERVACIÓN (MOCK SYSTEM) ALINEADAS AL NUEVO RETO
+        function renderMockResponse(userInput) {
+            const normalized = userInput.toLowerCase();
+            let mockText = "";
+            let jsonModule = null;
+
+            if (normalized.includes("promociones") || normalized.includes("promo") || normalized.includes("cross")) {
+                mockText = `He diseñado una propuesta estructurada para tu flujo de **Promociones y Beneficios en la Fase 1**. Este flujo fomenta la retención de clientes nuevos y estimula el cross-selling en caliente basándose en los botes activos más jugosos.`;
+                jsonModule = {
+                    title: "Flujo: Promociones y Cross-selling (Fase 1)",
+                    description: "Pasos estructurados para educar en ventajas y proponer la compra de un boleto promocional.",
+                    content: `[PASO 1: DETECCIÓN DE INTERÉS O INACTIVIDAD]
+El usuario entra a la web y el bot, tras 10 segundos de inactividad, activa un globo proactivo:
+Bot: "🎁 ¡Tengo un beneficio especial para ti hoy! ¿Deseas conocer las promociones de esta semana?"
+[Botón: Ver Promociones] [Botón: Jugar ahora]
+
+[PASO 2: DIFUSIÓN DE VENTAJAS Y VALOR]
+Usuario hace clic en 'Ver Promociones'.
+Bot: "🎰 ¡Comprar online es más cómodo y seguro! Disfrutas de:
+• 🏷️ Descuentos en tu primera jugada de MegaLotto.
+• 💳 Cobros instantáneos en cuenta de hasta 2,000 USD.
+• 🔔 Avisos automáticos de resultados a tu correo.
+
+Hoy tenemos el sorteo 'Súper Suerte' con un acumulado histórico de $10 Millones. Si compras un boleto hoy, ¡te regalamos una jugada de cortesía!"
+
+[PASO 3: ENLACE AL CARRITO (CROSS-SELLING)]
+[Botón: Activar Promo y Jugar] [Botón: Ver más beneficios]`
+                };
+            } else if (normalized.includes("atencion") || normalized.includes("alerta") || normalized.includes("premio") || normalized.includes("cobrar")) {
+                mockText = `Excelente, he estructurado el flujo inteligente de **Atención Personalizada y Alertas de Cobro en la Fase 2**, conectando de manera segura el perfil e historial de juego del usuario.`;
+                jsonModule = {
+                    title: "Flujo: Alertas de Premios & Promociones Personalizadas (Fase 2)",
+                    description: "Gestión proactiva una vez que el usuario inicia sesión de forma segura.",
+                    content: `[PASO 1: VALIDACIÓN Y LOGIN CONVERSACIONAL]
+El usuario tiene un token activo de sesión y abre el chat. El bot consulta el middleware.
+Bot: "¡Hola Carlos! 🔮 He revisado tus jugadas recientes y tengo excelentes noticias sobre tu último boleto de MegaLotto:
+
+• Sorteo del: 12 de Julio
+• Estado: ¡Boleto Premiado! 🎉
+• Monto por cobrar: $150.00 USD
+
+Además, en base a tu historial de sorteos favoritos, veo que tu pozo preferido llegó a un récord de $12 Millones. ¿Qué prefieres hacer?"
+
+[PASO 2: ACCIÓN TRANSACCIONAL DIRECTA]
+[Botón: Transferir $150 a mi banco] [Botón: Reinvertir en Súper Suerte] [Botón: Ver detalle del boleto]`
+                };
+            } else {
+                mockText = `He tomado nota de tu solicitud sobre "${userInput}". Para mantener un orden estricto de nuestra hoja de ruta conversacional, he generado una propuesta genérica de especificación que puedes incorporar a tu tablero de control.`;
+                jsonModule = {
+                    title: "Especificación Conversacional: Desarrollo Adicional",
+                    description: `Alcance conceptual construido a partir de: "${userInput}"`,
+                    content: `[ANÁLISIS DE INTERACCIÓN]
+Para dar cobertura a la consulta, se debe definir un flujo con:
+1. Intents y Variaciones de texto enriquecido.
+2. Contrato de API en middleware para sincronizar de forma nativa.
+3. Respuestas de respaldo (Fallbacks) para mitigar la frustración.`
+                };
+            }
+
+            renderAIResponse(mockText);
+        }
+
+        window.onload = function() {
+            loadProjectData();
+            
+            document.getElementById('project-title-display').innerText = projectData.title;
+            document.getElementById('project-desc-display').innerText = projectData.description;
+            document.getElementById('project-goal-display').innerText = projectData.goal;
+
+            renderPhases();
+            renderMilestones();
+            renderGanttAndBacklog();
+            renderKPIs();
+            renderAIModules();
+        }
     </script>
 </body>
 </html>
