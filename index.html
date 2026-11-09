@@ -40,6 +40,22 @@
             visibility: visible;
             opacity: 1;
         }
+
+        /* Estilos específicos para la exportación a PDF */
+        @media print {
+            aside, #chat-widget, header.md\:hidden, button, .dropdown-container {
+                display: none !important;
+            }
+            main {
+                overflow: visible !important;
+                height: auto !important;
+            }
+            /* Ocultar casos inactivos y mostrar todos los pasos del caso activo */
+            .case-view.hidden { display: none !important; }
+            .case-view:not(.hidden) .hidden { display: block !important; margin-bottom: 20px; opacity: 1 !important; }
+            body { background-color: white !important; }
+            .shadow-sm, .shadow-md, .shadow-xl { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+        }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-gray-800">
@@ -65,14 +81,14 @@
             </button>
             
             <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 mt-6">Herramientas</p>
-            <a href="#" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg text-slate-300 transition-colors">
+            <button onclick="switchCase('templates')" id="nav-templates" class="w-full flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg text-slate-300 transition-colors text-left">
                 <i data-lucide="file-text" class="w-5 h-5 shrink-0"></i>
                 <span class="text-sm">Plantillas Generales</span>
-            </a>
-            <a href="#" onclick="toggleChat()" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg text-indigo-400 transition-colors">
+            </button>
+            <button onclick="toggleChat()" class="w-full flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg text-violet-400 transition-colors text-left">
                 <i data-lucide="sparkles" class="w-5 h-5 shrink-0"></i>
                 <span class="text-sm">Asistente AI (Gema)</span>
-            </a>
+            </button>
         </nav>
         <div class="p-4 border-t border-slate-800 flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
@@ -106,9 +122,26 @@
                         <h2 class="text-2xl font-bold text-slate-800">Incidencia: Tinka Express (Tupay)</h2>
                         <p class="text-slate-500 mt-1">Flujo de atención para cobros no reflejados como jugadas.</p>
                     </div>
-                    <span class="bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full border border-amber-200">
-                        Prioridad Alta
-                    </span>
+                    <div class="flex items-center gap-3">
+                        <span class="bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full border border-amber-200">
+                            Prioridad Alta
+                        </span>
+                        
+                        <!-- Dropdown Descargar -->
+                        <div class="relative group cursor-pointer dropdown-container z-20">
+                            <button class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+                                <i data-lucide="download" class="w-4 h-4"></i> Descargar
+                            </button>
+                            <div class="absolute right-0 top-full mt-1 w-44 bg-white rounded-lg shadow-xl border border-slate-200 hidden group-hover:block overflow-hidden">
+                                <button onclick="window.print()" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2 border-b border-slate-100 transition-colors">
+                                    <i data-lucide="file-text" class="w-4 h-4 text-red-500"></i> PDF (.pdf)
+                                </button>
+                                <button onclick="exportToDoc('case-tupay', 'Procedimiento_Tupay')" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors">
+                                    <i data-lucide="file" class="w-4 h-4 text-blue-600"></i> Word (.doc)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Detalle de la incidencia -->
@@ -271,6 +304,57 @@
                 </div>
             </div> <!-- End case-login -->
 
+            <!-- PLANTILLAS GENERALES -->
+            <div id="case-templates" class="case-view hidden space-y-8 fade-in">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">Plantillas Generales</h2>
+                        <p class="text-slate-500 mt-1">Respuestas predeterminadas para atención transversal.</p>
+                    </div>
+                    <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-3 py-1 rounded-full border border-purple-200">
+                        Herramienta
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Plantilla 1 -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm group relative">
+                        <div class="flex justify-between items-start mb-3">
+                            <h5 class="font-bold text-slate-800 text-sm bg-slate-100 px-2 py-1 rounded">Saludo Inicial Genérico</h5>
+                            <button onclick="copyText('tpl-saludo')" class="text-slate-400 hover:text-purple-600 transition-colors bg-slate-50 p-1.5 rounded-md hover:bg-purple-50"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                        </div>
+                        <p class="text-sm text-slate-600" id="tpl-saludo">¡Hola, [Nombre del Cliente]! Gracias por comunicarte con el soporte de Tinka. Mi nombre es [Tu Nombre] y estaré encantado/a de ayudarte con tu consulta hoy. ¿Me podrías brindar más detalles sobre tu caso?</p>
+                    </div>
+
+                    <!-- Plantilla 2 -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm group relative">
+                        <div class="flex justify-between items-start mb-3">
+                            <h5 class="font-bold text-slate-800 text-sm bg-slate-100 px-2 py-1 rounded">Despedida Estándar</h5>
+                            <button onclick="copyText('tpl-despedida')" class="text-slate-400 hover:text-purple-600 transition-colors bg-slate-50 p-1.5 rounded-md hover:bg-purple-50"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                        </div>
+                        <p class="text-sm text-slate-600" id="tpl-despedida">Ha sido un placer ayudarte, [Nombre del Cliente]. Si tienes alguna otra duda o consulta en el futuro, no dudes en contactarnos nuevamente. ¡Que tengas un excelente día y mucha suerte en tus jugadas!</p>
+                    </div>
+
+                    <!-- Plantilla 3 -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm group relative">
+                        <div class="flex justify-between items-start mb-3">
+                            <h5 class="font-bold text-slate-800 text-sm bg-slate-100 px-2 py-1 rounded">Solicitud de Captura</h5>
+                            <button onclick="copyText('tpl-captura')" class="text-slate-400 hover:text-purple-600 transition-colors bg-slate-50 p-1.5 rounded-md hover:bg-purple-50"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                        </div>
+                        <p class="text-sm text-slate-600" id="tpl-captura">Para poder investigar a fondo lo sucedido y brindarte una solución más rápida, ¿serías tan amable de enviarnos una captura de pantalla donde se visualice el error o el comprobante mencionado? Quedo a la espera.</p>
+                    </div>
+
+                    <!-- Plantilla 4 -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm group relative">
+                        <div class="flex justify-between items-start mb-3">
+                            <h5 class="font-bold text-slate-800 text-sm bg-slate-100 px-2 py-1 rounded">Derivación a otra área</h5>
+                            <button onclick="copyText('tpl-deriva')" class="text-slate-400 hover:text-purple-600 transition-colors bg-slate-50 p-1.5 rounded-md hover:bg-purple-50"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                        </div>
+                        <p class="text-sm text-slate-600" id="tpl-deriva">Comprendo la situación, [Nombre del Cliente]. Este caso requiere una revisión técnica más profunda. Voy a derivar tu consulta a nuestra área especializada. Ellos se contactarán contigo en un plazo no mayor a 24-48 horas hábiles. Agradecemos tu paciencia.</p>
+                    </div>
+                </div>
+            </div> <!-- End case-templates -->
+
         </div>
     </main>
 
@@ -278,24 +362,24 @@
     <div id="chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
         <!-- Chat Window -->
         <div id="chat-window" class="hidden bg-white w-[340px] sm:w-[400px] rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex-col mb-4 transition-all duration-300 transform h-[550px]">
-            <div class="bg-indigo-600 text-white p-4 flex items-center justify-between shadow-md z-10">
+            <div class="bg-violet-600 text-white p-4 flex items-center justify-between shadow-md z-10">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center border border-white/30 backdrop-blur-sm">
                         <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
                     </div>
                     <div>
                         <h3 class="font-bold text-sm leading-tight">Asistente Gema</h3>
-                        <p class="text-[11px] text-indigo-200 font-medium">Soporte IA para CX Tinka</p>
+                        <p class="text-[11px] text-violet-200 font-medium">Soporte IA para CX Tinka</p>
                     </div>
                 </div>
-                <button onclick="toggleChat()" class="text-indigo-200 hover:text-white p-1 hover:bg-white/10 rounded-lg transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button onclick="toggleChat()" class="text-violet-200 hover:text-white p-1 hover:bg-white/10 rounded-lg transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             
             <div id="chat-messages" class="flex-1 p-4 overflow-y-auto bg-slate-50 flex flex-col gap-4 text-sm">
                 <!-- Welcome Message -->
                 <div class="flex items-start gap-2">
-                    <div class="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 mt-1">
-                        <i data-lucide="bot" class="w-4 h-4 text-indigo-600"></i>
+                    <div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center shrink-0 mt-1">
+                        <i data-lucide="bot" class="w-4 h-4 text-violet-600"></i>
                     </div>
                     <div class="bg-white border border-slate-200 text-slate-700 p-3.5 rounded-2xl rounded-tl-sm shadow-sm leading-relaxed">
                         ¡Hola! Soy <strong>Gema</strong> 💎, tu asistente inteligente. <br><br>
@@ -306,25 +390,25 @@
             
             <!-- Loading Indicator -->
             <div id="chat-loading" class="hidden px-4 pb-3 bg-slate-50">
-                <div class="flex items-center gap-1.5 text-indigo-400 text-xs font-medium bg-indigo-50/50 w-max px-3 py-1.5 rounded-full border border-indigo-100">
-                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"></span>
-                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
-                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                <div class="flex items-center gap-1.5 text-violet-500 text-xs font-medium bg-violet-50/50 w-max px-3 py-1.5 rounded-full border border-violet-100">
+                    <span class="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce"></span>
+                    <span class="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
+                    <span class="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
                     <span class="ml-1">Gema está pensando...</span>
                 </div>
             </div>
             
             <div class="p-3 bg-white border-t border-slate-200">
                 <form id="chat-form" class="flex items-center gap-2" onsubmit="handleChatSubmit(event)">
-                    <input type="text" id="chat-input" placeholder="Pregunta sobre un caso o procedimiento..." class="flex-1 border border-slate-300 rounded-full pl-4 pr-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-shadow" autocomplete="off">
-                    <button type="submit" id="chat-submit-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors shadow-sm">
+                    <input type="text" id="chat-input" placeholder="Pregunta sobre un caso o procedimiento..." class="flex-1 border border-slate-300 rounded-full pl-4 pr-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-shadow" autocomplete="off">
+                    <button type="submit" id="chat-submit-btn" class="bg-violet-600 hover:bg-violet-700 text-white w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors shadow-sm">
                         <i data-lucide="send" class="w-4 h-4 ml-0.5"></i>
                     </button>
                 </form>
             </div>
         </div>
         <!-- Chat Toggle Button -->
-        <button onclick="toggleChat()" id="chat-toggle-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-5 py-3.5 shadow-xl flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 group">
+        <button onclick="toggleChat()" id="chat-toggle-btn" class="bg-violet-600 hover:bg-violet-700 text-white rounded-full px-5 py-3.5 shadow-xl flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 group">
             <i data-lucide="sparkles" class="w-6 h-6 group-hover:animate-pulse"></i>
             <span class="font-bold hidden sm:inline tracking-wide">Pregúntale a Gema</span>
         </button>
@@ -372,14 +456,16 @@
             document.getElementById(`case-${caseId}`).classList.remove('hidden');
             
             // Update sidebar active states
-            document.querySelectorAll('nav button').forEach(btn => {
+            document.querySelectorAll('nav button[id^="nav-"]').forEach(btn => {
                 btn.classList.remove('bg-red-600', 'text-white');
                 btn.classList.add('hover:bg-slate-800', 'text-slate-300');
             });
             
             const activeBtn = document.getElementById(`nav-${caseId}`);
-            activeBtn.classList.remove('hover:bg-slate-800', 'text-slate-300');
-            activeBtn.classList.add('bg-red-600', 'text-white');
+            if (activeBtn) {
+                activeBtn.classList.remove('hover:bg-slate-800', 'text-slate-300');
+                activeBtn.classList.add('bg-red-600', 'text-white');
+            }
         }
 
         // --- NEW: Gema AI Chat Logic ---
@@ -394,7 +480,8 @@
         Reglas:
         1. Sé empática, concisa y directa. Eres una compañera de trabajo.
         2. Si te piden redactar un mensaje para un cliente, hazlo con tono profesional, amable y pidiendo disculpas por los inconvenientes.
-        3. Formatea tus respuestas usando saltos de línea para que sea fácil de leer en un chat pequeño.`;
+        3. Formatea tus respuestas usando saltos de línea para que sea fácil de leer en un chat pequeño.
+        4. Si el usuario te pide descargar el procedimiento en documento, explícale que puede usar el botón superior derecho "Descargar" en el panel de incidencia para generar un PDF o Word.`;
 
         function toggleChat() {
             const chatWindow = document.getElementById('chat-window');
@@ -421,7 +508,7 @@
         function appendMessage(role, text) {
             const messagesContainer = document.getElementById('chat-messages');
             const messageDiv = document.createElement('div');
-            messageDiv.className = 'flex items-start gap-2 fade-in';
+            messageDiv.className = 'flex items-start gap-2 fade-in group';
             
             if (role === 'user') {
                 messageDiv.classList.add('flex-row-reverse');
@@ -429,19 +516,27 @@
                     <div class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center shrink-0 mt-1">
                         <i data-lucide="user" class="w-4 h-4 text-slate-600"></i>
                     </div>
-                    <div class="bg-indigo-600 text-white p-3.5 rounded-2xl rounded-tr-sm shadow-sm text-sm">
+                    <div class="bg-violet-600 text-white p-3.5 rounded-2xl rounded-tr-sm shadow-sm text-sm">
                         ${escapeHTML(text)}
                     </div>
                 `;
             } else {
-                // Formatear texto simple para la IA (saltos de línea)
-                const formattedText = escapeHTML(text).replace(/\n/g, '<br>');
+                // Formatear texto simple para la IA (saltos de línea y negritas básicas)
+                let formattedText = escapeHTML(text).replace(/\n/g, '<br>');
+                formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                
+                // Asignamos un ID único para poder copiar el texto
+                const msgId = 'msg-' + Date.now();
+                
                 messageDiv.innerHTML = `
-                    <div class="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 mt-1">
-                        <i data-lucide="bot" class="w-4 h-4 text-indigo-600"></i>
+                    <div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center shrink-0 mt-1">
+                        <i data-lucide="bot" class="w-4 h-4 text-violet-600"></i>
                     </div>
-                    <div class="bg-white border border-slate-200 text-slate-700 p-3.5 rounded-2xl rounded-tl-sm shadow-sm text-sm leading-relaxed">
-                        ${formattedText}
+                    <div class="relative bg-white border border-slate-200 text-slate-700 p-3.5 rounded-2xl rounded-tl-sm shadow-sm text-sm leading-relaxed max-w-[85%]">
+                        <div id="${msgId}">${formattedText}</div>
+                        <button onclick="copyText('${msgId}')" class="absolute -right-8 top-2 text-slate-300 hover:text-violet-600 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-white rounded-md shadow-sm border border-slate-200" title="Copiar mensaje">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
                     </div>
                 `;
             }
@@ -480,12 +575,15 @@
             submitBtn.disabled = true;
             loadingIndicator.classList.remove('hidden');
             
-            // Add user message to memory
-            chatHistory.push({ role: "user", parts: [{ text: message }] });
+            // Crear el nuevo mensaje del usuario
+            const newUserMessage = { role: "user", parts: [{ text: message }] };
+            // Usamos un array temporal para enviarlo a la API y prevenir que si falla, 
+            // se quede guardado y genere un error 400 (roles consecutivos iguales) en el próximo intento.
+            const payloadHistory = [...chatHistory, newUserMessage];
 
             try {
                 const payload = {
-                    contents: chatHistory,
+                    contents: payloadHistory,
                     systemInstruction: { parts: [{ text: systemPrompt }] }
                 };
 
@@ -500,12 +598,16 @@
                 if (result.candidates && result.candidates[0] && result.candidates[0].content) {
                     const replyText = result.candidates[0].content.parts[0].text;
                     appendMessage('model', replyText);
-                    chatHistory.push(result.candidates[0].content); // Save AI response to memory
+                    
+                    // Solo si la API responde con éxito, guardamos la conversación en la memoria principal
+                    chatHistory.push(newUserMessage);
+                    chatHistory.push(result.candidates[0].content);
                 } else {
+                    console.error("Respuesta inesperada de Gemini:", result);
                     appendMessage('model', "Lo siento, hubo un problema al procesar mi respuesta. ¿Podrías intentar de nuevo?");
                 }
             } catch (error) {
-                console.error(error);
+                console.error("Error en Fetch:", error);
                 appendMessage('model', "⚠️ Error de conexión. Revisa tu internet e intenta nuevamente.");
             } finally {
                 loadingIndicator.classList.add('hidden');
@@ -545,6 +647,42 @@
             setTimeout(function(){ 
                 toast.classList.remove("show"); 
             }, 3000);
+        }
+
+        // Export to Word document functionality
+        function exportToDoc(elementId, filename = '') {
+            const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
+            const postHtml = "</body></html>";
+            
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            // Clonamos el elemento para limpiarlo de botones innecesarios en el doc
+            const clone = element.cloneNode(true);
+            const hiddenEls = clone.querySelectorAll('.hidden');
+            // En Word mostramos todo el flujo, así que quitamos las clases hidden
+            hiddenEls.forEach(el => el.classList.remove('hidden')); 
+            
+            // Eliminamos botones de acción de UI
+            const buttons = clone.querySelectorAll('button, .dropdown-container');
+            buttons.forEach(btn => btn.remove());
+            
+            const html = preHtml + clone.innerHTML + postHtml;
+            const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+            
+            filename = filename ? filename + '.doc' : 'documento.doc';
+            
+            const downloadLink = document.createElement("a");
+            document.body.appendChild(downloadLink);
+            
+            if (navigator.msSaveOrOpenBlob) {
+                navigator.msSaveOrOpenBlob(blob, filename);
+            } else {
+                downloadLink.href = URL.createObjectURL(blob);
+                downloadLink.download = filename;
+                downloadLink.click();
+            }
+            document.body.removeChild(downloadLink);
         }
     </script>
 </body>
