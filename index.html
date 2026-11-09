@@ -3,1649 +3,548 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ecosistema de Diseño Conversacional - Loterías IA</title>
-    <!-- Tailwind CSS para diseño moderno y premium -->
+    <title>Dashboard CX - Incidencia Tinka Express</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome para Iconografía fluida -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Google Fonts - Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Biblioteca jsPDF para exportar a PDF (Nueva) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            slate: '#0f172a', /* Slate 900 */
-                            card: '#1e293b',  /* Slate 800 */
-                            teal: '#0d9488',  /* Teal 600 - Menta */
-                            teallight: '#14b8a6', /* Teal 500 */
-                            mintbg: '#f0fdfa', /* Teal 50 */
-                            border: '#334155',  /* Slate 700 */
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
         }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #10B981;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 12px;
+            position: fixed;
+            z-index: 50;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        .dark-scrollbar::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        .dark-scrollbar::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
-        }
-        /* Transiciones fluidas */
-        .tab-transition {
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans h-screen max-h-screen flex flex-col overflow-hidden">
+<body class="flex h-screen overflow-hidden text-gray-800">
 
-    <!-- ENCABEZADO PRINCIPAL DE LA PLATAFORMA -->
-    <header class="bg-slate-950 border-b border-slate-800 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 z-10 shrink-0 shadow-lg">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-gradient-to-tr from-brand-teal to-emerald-400 rounded-xl flex items-center justify-center text-white text-lg font-bold shadow-md shadow-brand-teal/20 animate-pulse">
-                <i class="fa-solid fa-dice-d20"></i>
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900 text-white flex flex-col hidden md:flex">
+        <div class="p-6 border-b border-slate-800">
+            <div class="flex items-center gap-3">
+                <i data-lucide="ticket" class="text-red-500 w-8 h-8"></i>
+                <h1 class="text-xl font-bold tracking-wide">CX<span class="text-red-500">Tinka</span></h1>
+            </div>
+            <p class="text-slate-400 text-sm mt-2">Centro de Resolución</p>
+        </div>
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 mt-2">Incidencias Activas</p>
+            <button onclick="switchCase('tupay')" id="nav-tupay" class="w-full flex items-center gap-3 p-3 bg-red-600 rounded-lg text-white transition-colors text-left">
+                <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
+                <span class="text-sm">Cobro no reflejado (Tupay)</span>
+            </button>
+            <button onclick="switchCase('login')" id="nav-login" class="w-full flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg text-slate-300 transition-colors text-left">
+                <i data-lucide="user-x" class="w-5 h-5 shrink-0"></i>
+                <span class="text-sm">Error Login (Bucle)</span>
+            </button>
+            
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 mt-6">Herramientas</p>
+            <a href="#" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg text-slate-300 transition-colors">
+                <i data-lucide="file-text" class="w-5 h-5 shrink-0"></i>
+                <span class="text-sm">Plantillas Generales</span>
+            </a>
+            <a href="#" onclick="toggleChat()" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg text-indigo-400 transition-colors">
+                <i data-lucide="sparkles" class="w-5 h-5 shrink-0"></i>
+                <span class="text-sm">Asistente AI (Gema)</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-slate-800 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
+                <i data-lucide="user" class="w-4 h-4 text-slate-300"></i>
             </div>
             <div>
-                <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
-                    Loterías IA: Workspace Conversacional
-                </h1>
-                <p class="text-xs text-slate-400 font-medium">Consola de Arquitectura Conversacional & Product Management</p>
+                <p class="text-sm font-medium">Agente CX</p>
+                <p class="text-xs text-slate-400">En línea</p>
             </div>
         </div>
-        
-        <div class="flex items-center gap-2 flex-wrap md:flex-nowrap">
-            <!-- Botón Compartir / Exportar -->
-            <button onclick="openShareExportModal()" class="bg-brand-teal hover:bg-brand-teallight text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-md shadow-brand-teal/20 transition flex items-center gap-1.5" title="Compartir proyecto o descargar reportes">
-                <i class="fa-solid fa-share-nodes"></i> Compartir / Exportar
-            </button>
-            <button onclick="resetToDefaults()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition flex items-center gap-1.5" title="Restaurar datos iniciales">
-                <i class="fa-solid fa-rotate-left"></i> Restaurar MVP
-            </button>
-        </div>
-    </header>
+    </aside>
 
-    <!-- WORKSPACE PRINCIPAL EN REJILLA RESPONSIVA -->
-    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative min-h-0">
-        
-        <!-- PANEL DE CONTROL IZQUIERDO (CONSOLA DE PROYECTO) -->
-        <section class="w-full h-full lg:w-3/5 flex flex-col border-r border-slate-800 bg-slate-950/40 overflow-hidden min-h-0">
-            <!-- Selector de Tabs para organización limpia -->
-            <div class="flex bg-slate-950/80 border-b border-slate-800 shrink-0 overflow-x-auto scrollbar-none relative z-20 backdrop-blur-md">
-                <button onclick="switchTab('tab-specs')" id="btn-tab-specs" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-brand-teal text-brand-teal bg-slate-900/50 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-file-invoice"></i> Especificaciones
-                </button>
-                <button onclick="switchTab('tab-roadmap')" id="btn-tab-roadmap" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/20 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-route"></i> Fases del Roadmap
-                </button>
-                <button onclick="switchTab('tab-milestones')" id="btn-tab-milestones" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/20 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-flag-checkered"></i> Milestones & Artefactos
-                </button>
-                <button onclick="switchTab('tab-gantt')" id="btn-tab-gantt" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/20 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-chart-gantt"></i> Gantt & Backlog
-                </button>
-                <button onclick="switchTab('tab-kpis')" id="btn-tab-kpis" class="min-w-[150px] flex-1 py-3 px-4 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/20 tab-transition flex items-center justify-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-chart-line"></i> Objetivos y KPIs
-                </button>
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto">
+        <!-- Header Mobile -->
+        <header class="md:hidden bg-slate-900 text-white p-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="ticket" class="text-red-500 w-6 h-6"></i>
+                <h1 class="text-lg font-bold">CX<span class="text-red-500">Tinka</span></h1>
             </div>
+            <i data-lucide="menu" class="w-6 h-6"></i>
+        </header>
 
-            <!-- CONTENIDO DE TABS -->
-            <div class="flex-1 overflow-y-auto p-6 space-y-6 dark-scrollbar relative min-h-0">
-                
-                <!-- TAB 1: ESPECIFICACIONES GENERALES -->
-                <div id="tab-specs" class="space-y-6">
-                    <div class="bg-brand-card rounded-2xl border border-brand-border p-6 shadow-xl relative overflow-hidden group">
-                        <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-brand-teal to-emerald-400"></div>
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-2">
-                                <span class="p-1.5 bg-teal-500/10 text-brand-teal rounded-lg"><i class="fa-solid fa-circle-info"></i></span>
-                                <h3 class="text-lg font-bold text-slate-100">Descripción General del Proyecto</h3>
-                            </div>
-                            <button onclick="toggleEdit('project-description')" class="text-xs text-brand-teal hover:text-teal-400 font-semibold flex items-center gap-1 transition">
-                                <i class="fa-solid fa-pen-to-square"></i> <span id="btn-edit-text-desc">Editar</span>
-                            </button>
-                        </div>
-                        
-                        <!-- Texto editable en caliente -->
-                        <div id="desc-view-mode" class="space-y-3">
-                            <h4 id="project-title-display" class="text-xl font-extrabold text-slate-100 tracking-tight">Asistente Virtual Inteligente – Experiencia Omnicanal Loterías</h4>
-                            <p id="project-desc-display" class="text-sm text-slate-300 leading-relaxed">
-                                El proyecto consiste en el diseño, desarrollo e implementación de un Asistente Virtual basado en Inteligencia Artificial Generativa (GenAI) y Procesamiento de Lenguaje Natural (NLP), integrado nativamente en la interfaz de la nueva plataforma web de loterías.
-                            </p>
-                            <p id="project-goal-display" class="text-sm text-slate-300 leading-relaxed">
-                                El objetivo principal es transformar la navegación del usuario en una experiencia guiada, lúdica y sin fricciones. El bot actuará como un copiloto conversacional que acompaña al cliente a lo largo de su customer journey, resolviendo dudas inmediatas en momentos críticos (preventa y postventa) y fomentando la retención.
-                            </p>
-                        </div>
-                        
-                        <!-- Formulario de edición oculto -->
-                        <div id="desc-edit-mode" class="hidden space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Título del Proyecto</label>
-                                <input id="edit-project-title" type="text" class="w-full bg-slate-900 border border-brand-border rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Descripción General</label>
-                                <textarea id="edit-project-desc" rows="3" class="w-full bg-slate-900 border border-brand-border rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal resize-none"></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Misión y Objetivos de CX</label>
-                                <textarea id="edit-project-goal" rows="3" class="w-full bg-slate-900 border border-brand-border rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal resize-none"></textarea>
-                            </div>
-                            <div class="flex justify-end gap-2">
-                                <button onclick="saveDescription()" class="bg-brand-teal hover:bg-brand-teallight text-white text-xs font-bold px-3 py-2 rounded-lg transition">Guardar Cambios</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- SECCIÓN DINÁMICA: NUEVOS MÓDULOS GENERADOS POR IA -->
-                    <div class="border-t border-slate-800 pt-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-md font-bold text-slate-200 flex items-center gap-2">
-                                <i class="fa-solid fa-folder-plus text-brand-teal"></i> Módulos Adicionales y Flujos Detallados
-                            </h3>
-                            <span class="text-xs bg-slate-800 px-2 py-1 rounded-md text-slate-400 font-medium">Auto-alimentable</span>
-                        </div>
-                        
-                        <div id="ai-modules-container" class="space-y-4">
-                            <!-- Los módulos agregados por el usuario o la IA aparecerán aquí -->
-                            <div id="no-modules-placeholder" class="bg-slate-900/50 rounded-xl border border-dashed border-slate-800 p-8 text-center">
-                                <p class="text-sm text-slate-400">¿Quieres profundizar en un flujo de cobro de premios, promociones o integraciones avanzadas?</p>
-                                <p class="text-xs text-brand-teal mt-2">Pídele a la IA copiloto de la derecha que te ayude a estructurar nuevos módulos y haz clic en "Añadir al Tablero".</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB 2: ROADMAP DE FASES -->
-                <div id="tab-roadmap" class="hidden space-y-6">
-                    <div class="flex justify-between items-center sticky top-0 bg-slate-950/90 backdrop-blur-md pb-4 z-10 pt-2 border-b border-slate-800/50">
-                        <h3 class="text-lg font-bold text-slate-100">Fases del Ecosistema Conversacional</h3>
-                        <button onclick="openAddPhaseModal()" class="bg-brand-teal hover:bg-brand-teallight text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-lg shadow-teal-500/20">
-                            <i class="fa-solid fa-plus"></i> Añadir Nueva Fase
-                        </button>
-                    </div>
-
-                    <div id="phases-list" class="space-y-6 relative before:absolute before:left-6 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800 pt-2">
-                        <!-- Las fases del roadmap se renderizan dinámicamente -->
-                    </div>
-                </div>
-
-                <!-- TAB 3: MILESTONES & ARTEFACTOS -->
-                <div id="tab-milestones" class="hidden space-y-6">
-                    <div class="flex justify-between items-center sticky top-0 bg-slate-950/90 backdrop-blur-md pb-4 z-10 pt-2 border-b border-slate-800/50">
-                        <div>
-                            <h3 class="text-lg font-bold text-slate-100">Milestones y Artefactos Requeridos</h3>
-                            <p class="text-xs text-slate-400 mt-1">Estructura clave de entregables para diseño conversacional y arquitectura de software.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2" id="milestones-container">
-                        <!-- Los hitos se renderizan de forma dinámica desde JS -->
-                    </div>
-                </div>
-
-                <!-- TAB 4: GANTT & BACKLOG -->
-                <div id="tab-gantt" class="hidden space-y-6">
-                    <div class="sticky top-0 bg-slate-950/90 backdrop-blur-md pb-4 z-10 pt-2 border-b border-slate-800/50">
-                        <h3 class="text-lg font-bold text-slate-100">Planificador del Proyecto (Cronograma Gantt)</h3>
-                        <p class="text-xs text-slate-400 mt-1">Gantt interactivo a 12 semanas para las fases de diseño y desarrollo.</p>
-                    </div>
-
-                    <!-- Gantt Chart Container -->
-                    <div class="bg-brand-card border border-brand-border rounded-2xl p-4 overflow-x-auto shadow-xl dark-scrollbar mt-2">
-                        <div class="min-w-[700px] space-y-3">
-                            <!-- Gantt Header Weeks -->
-                            <div class="grid grid-cols-13 gap-2 border-b border-slate-700 pb-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                <div class="col-span-4 text-left">Tarea / Actividad</div>
-                                <div class="col-span-9 grid grid-cols-12 gap-1">
-                                    <div>S1</div><div>S2</div><div>S3</div><div>S4</div><div>S5</div><div>S6</div>
-                                    <div>S7</div><div>S8</div><div>S9</div><div>S10</div><div>S11</div><div>S12</div>
-                                </div>
-                            </div>
-                            
-                            <!-- Gantt Rows (Generados Dinámicamente) -->
-                            <div id="gantt-rows" class="space-y-3">
-                                <!-- Las filas de tareas se llenan dinámicamente -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Backlog Scrum-like Board -->
-                    <div class="border-t border-slate-800 pt-6 mt-8">
-                        <div class="flex justify-between items-center mb-4">
-                            <div>
-                                <h3 class="text-md font-bold text-slate-200">Backlog de Tareas del Proyecto</h3>
-                                <p class="text-xs text-slate-400">Arrastra o cambia el estado de los entregables y artefactos.</p>
-                            </div>
-                            <button onclick="openAddTaskModal()" class="bg-brand-teal/20 border border-brand-teal text-brand-teallight px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 hover:bg-brand-teal hover:text-white">
-                                <i class="fa-solid fa-plus"></i> Nueva Tarea
-                            </button>
-                        </div>
-
-                        <!-- Kanban Columns -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="kanban-board">
-                            <!-- Columna 1: Por Hacer -->
-                            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex flex-col min-h-[300px]">
-                                <div class="flex justify-between items-center mb-3">
-                                    <span class="text-xs font-bold text-slate-400 uppercase flex items-center gap-1.5">
-                                        <i class="fa-solid fa-hourglass-start text-amber-500"></i> Backlog
-                                    </span>
-                                    <span id="count-todo" class="text-xs bg-slate-800 px-2 py-0.5 rounded-md text-slate-300">0</span>
-                                </div>
-                                <div id="col-todo" class="space-y-3 flex-1 overflow-y-auto max-h-[350px] dark-scrollbar">
-                                    <!-- Tarjetas de tareas en estado TODO -->
-                                </div>
-                            </div>
-
-                            <!-- Columna 2: En Progreso -->
-                            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex flex-col min-h-[300px]">
-                                <div class="flex justify-between items-center mb-3">
-                                    <span class="text-xs font-bold text-slate-400 uppercase flex items-center gap-1.5">
-                                        <i class="fa-solid fa-gears text-brand-teal animate-spin"></i> En Progreso
-                                    </span>
-                                    <span id="count-progress" class="text-xs bg-slate-800 px-2 py-0.5 rounded-md text-slate-300">0</span>
-                                </div>
-                                <div id="col-progress" class="space-y-3 flex-1 overflow-y-auto max-h-[350px] dark-scrollbar">
-                                    <!-- Tarjetas de tareas en estado PROGRESS -->
-                                </div>
-                            </div>
-
-                            <!-- Columna 3: Completado -->
-                            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex flex-col min-h-[300px]">
-                                <div class="flex justify-between items-center mb-3">
-                                    <span class="text-xs font-bold text-slate-400 uppercase flex items-center gap-1.5">
-                                        <i class="fa-solid fa-circle-check text-emerald-500"></i> Completado
-                                    </span>
-                                    <span id="count-done" class="text-xs bg-slate-800 px-2 py-0.5 rounded-md text-slate-300">0</span>
-                                </div>
-                                <div id="col-done" class="space-y-3 flex-1 overflow-y-auto max-h-[350px] dark-scrollbar">
-                                    <!-- Tarjetas de tareas en estado DONE -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB 5: OBJETIVOS Y KPIS -->
-                <div id="tab-kpis" class="hidden space-y-6">
-                    <div class="flex justify-between items-center sticky top-0 bg-slate-950/90 backdrop-blur-md pb-4 z-10 pt-2 border-b border-slate-800/50">
-                        <h3 class="text-lg font-bold text-slate-100">Métricas Clave de Rendimiento (KPIs)</h3>
-                        <button onclick="openAddKPIModal()" class="bg-brand-teal hover:bg-brand-teallight text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-lg shadow-teal-500/20">
-                            <i class="fa-solid fa-plus"></i> Añadir Indicador
-                        </button>
-                    </div>
-
-                    <div id="kpi-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                        <!-- Renderización dinámica de indicadores -->
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- PANEL DE COPILOTO CON IA (WORKSPACE DE PRODUCTO DERECHA) -->
-        <section class="w-full h-full lg:w-2/5 flex flex-col bg-slate-950 overflow-hidden relative min-h-0 border-l-4 border-slate-900">
-            <div class="p-4 border-b border-slate-800 bg-slate-900/80 flex justify-between items-center shrink-0">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-3 h-3 bg-brand-teal rounded-full animate-ping"></div>
+        <div class="p-6 md:p-8 max-w-6xl mx-auto w-full space-y-8">
+            
+            <!-- CONTENEDOR DE CASOS MULTIPLES -->
+            <div id="case-tupay" class="case-view block space-y-8">
+                <!-- Header Title -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h3 class="text-sm font-bold text-slate-200">Copiloto IA Product Owner</h3>
-                        <p class="text-[10px] text-slate-400">Equipado con los Skills de Experto Conversacional</p>
+                        <h2 class="text-2xl font-bold text-slate-800">Incidencia: Tinka Express (Tupay)</h2>
+                        <p class="text-slate-500 mt-1">Flujo de atención para cobros no reflejados como jugadas.</p>
                     </div>
+                    <span class="bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full border border-amber-200">
+                        Prioridad Alta
+                    </span>
                 </div>
-                
-                <!-- Estado de la API -->
-                <div id="api-status" class="text-xs bg-slate-800 px-2.5 py-1 rounded-full text-amber-400 border border-slate-700 flex items-center gap-1.5" title="Requiere API Key para funcionar online">
-                    <i class="fa-solid fa-triangle-exclamation text-[10px]"></i> Modo Simulado
-                </div>
-            </div>
 
-            <!-- AREA DE CHAT DE IA -->
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 dark-scrollbar flex flex-col min-h-0">
-                <!-- Mensaje de bienvenida de IA -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 max-w-[90%] self-start relative shadow-lg">
-                    <div class="flex items-center gap-2 mb-2 text-brand-teal text-xs font-bold uppercase tracking-wider">
-                        <i class="fa-solid fa-robot"></i> Copiloto de Producto
-                    </div>
-                    <p class="text-sm text-slate-300 leading-relaxed">
-                        ¡Hola! Soy tu asistente de diseño conversacional con IA. He cargado la nueva arquitectura para tu bot de loterías.
-                    </p>
-                    <p class="text-sm text-slate-300 leading-relaxed mt-2">
-                        Ahora podemos colaborar en:
-                    </p>
-                    <ul class="text-xs text-slate-400 space-y-1 mt-2 list-disc pl-4">
-                        <li>Diseñar y estructurar flujos detallados de <strong>Promociones y Cross-selling</strong> (Fase 1).</li>
-                        <li>Detallar la capa de <strong>Atención Personalizada</strong> y flujos de alertas de cobro de premios (Fase 2).</li>
-                        <li>Configurar los diagramas de Gantt, milestones y artefactos del plan de trabajo.</li>
+                <!-- Detalle de la incidencia -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                        <i data-lucide="info" class="w-5 h-5 text-blue-500"></i> Detalle de la Incidencia
+                    </h3>
+                    <ul class="list-disc pl-6 text-sm text-slate-600 space-y-1">
+                        <li>El cliente juega por Tinka Express (invitado) y elige pagar con billetera Tupay mediante QR.</li>
+                        <li>Se debita el saldo de la billetera del cliente con éxito, pero la jugada <b>NO</b> se genera.</li>
+                        <li>Como no ve una cuenta registrada al momento, el cliente reclama la devolución inmediata de su dinero.</li>
                     </ul>
                 </div>
-            </div>
 
-            <!-- ATAJOS DE GENERACIÓN RÁPIDA -->
-            <div class="px-4 py-3 bg-slate-900/50 border-t border-slate-800/80 flex gap-2 overflow-x-auto shrink-0 scrollbar-none shadow-inner">
-                <button onclick="triggerQuickAction('flow-promos')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-tag text-brand-teal"></i> Detallar Flujo Promociones
-                </button>
-                <button onclick="triggerQuickAction('flow-alerts')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-bell text-brand-teal"></i> Detallar Alertas Premios F2
-                </button>
-                <button onclick="triggerQuickAction('flow-artifacts')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-boxes-stacked text-brand-teal"></i> Diseñar Artefactos UX
-                </button>
-            </div>
+                <!-- Asistente de Diagnóstico Interactivo -->
+                <div class="bg-white rounded-xl border border-indigo-100 shadow-sm overflow-hidden">
+                    <div class="bg-indigo-50 border-b border-indigo-100 p-4">
+                        <h3 class="font-bold text-indigo-900 flex items-center gap-2">
+                            <i data-lucide="git-merge" class="w-5 h-5"></i> Asistente de Diagnóstico Paso a Paso
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <!-- Step 1 -->
+                        <div id="step-1" class="space-y-4 fade-in">
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold shrink-0">1</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800">Recepción y Validación Inicial</h4>
+                                    <p class="text-sm text-slate-600 mt-1">Pídele al cliente evidencia del cobro (comprobante de la billetera digital) y su número/correo de contacto.</p>
+                                </div>
+                            </div>
+                            <div class="pl-11 pt-2">
+                                <button onclick="goToStep(2)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                                    Evidencia validada. Siguiente paso <i data-lucide="arrow-right" class="w-4 h-4 inline-block ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
 
-            <!-- ENTRADA DE TEXTO DE CHAT -->
-            <div class="p-4 border-t border-slate-800 bg-slate-950 shrink-0">
-                <div class="relative flex items-center">
-                    <textarea id="chat-input" rows="2" placeholder="Pídele al copiloto detallar un flujo o añadir módulos..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-4 pr-12 py-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal resize-none dark-scrollbar shadow-inner" onkeydown="handleChatKeydown(event)"></textarea>
-                    <button id="btn-send-message" onclick="sendChatMessage()" class="absolute right-2 top-2 bottom-2 w-10 bg-brand-teal hover:bg-brand-teallight text-white rounded-lg flex items-center justify-center transition shadow-md" title="Enviar Mensaje">
-                        <i class="fa-solid fa-paper-plane text-sm"></i>
-                    </button>
+                        <!-- Step 2 -->
+                        <div id="step-2" class="space-y-4 hidden fade-in">
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold shrink-0">2</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800">Filtro: ¿El cliente tiene cuenta en Tinka?</h4>
+                                    <p class="text-sm text-slate-600 mt-1">Consulta con el cliente si actualmente posee una cuenta registrada. Según su respuesta, selecciona un escenario:</p>
+                                </div>
+                            </div>
+                            <div class="pl-11 pt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <button onclick="showResult('A')" class="bg-white border-2 border-slate-200 hover:border-green-500 hover:bg-green-50 text-slate-700 p-4 rounded-xl text-sm font-medium transition-all text-left group">
+                                    <span class="block text-green-600 font-bold mb-2 group-hover:scale-105 transition-transform origin-left">Escenario A</span>
+                                    Sí tiene cuenta, <br>con opción de premios <b>ACTIVA</b>
+                                </button>
+                                <button onclick="showResult('B')" class="bg-white border-2 border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-slate-700 p-4 rounded-xl text-sm font-medium transition-all text-left group">
+                                    <span class="block text-amber-600 font-bold mb-2 group-hover:scale-105 transition-transform origin-left">Escenario B</span>
+                                    Sí tiene cuenta, <br><b>SIN</b> opción activa
+                                </button>
+                                <button onclick="showResult('C')" class="bg-white border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-slate-700 p-4 rounded-xl text-sm font-medium transition-all text-left group">
+                                    <span class="block text-blue-600 font-bold mb-2 group-hover:scale-105 transition-transform origin-left">Escenario C</span>
+                                    <b>No</b> tiene cuenta <br>(Jugó solo como invitado)
+                                </button>
+                            </div>
+                            <div class="pl-11 mt-4">
+                                <button onclick="goToStep(1)" class="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1 font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al paso 1</button>
+                            </div>
+                        </div>
+
+                        <!-- Result A -->
+                        <div id="result-A" class="space-y-4 hidden fade-in bg-green-50 p-6 rounded-xl border border-green-200">
+                            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                                <div>
+                                    <h4 class="font-bold text-green-800 flex items-center gap-2 text-lg"><i data-lucide="check-circle" class="w-6 h-6"></i> Escenario A: Saldo Automático</h4>
+                                    <p class="text-sm text-green-700 mt-2">El sistema ha convertido automáticamente el cobro en saldo en su cuenta. Pide al cliente que inicie sesión y lo verifique. <span class="font-bold bg-green-200 px-1 rounded">No es necesario derivar a Digital.</span></p>
+                                </div>
+                                <button onclick="resetFlow()" class="text-sm text-green-700 hover:text-green-900 font-medium shrink-0 flex items-center gap-1 bg-green-200/50 hover:bg-green-200 px-3 py-1.5 rounded-lg transition-colors"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reiniciar Flujo</button>
+                            </div>
+                            <div class="bg-white border border-green-200 rounded-lg p-4 shadow-sm relative group mt-4">
+                                <button onclick="copyText('speech-a')" class="absolute top-3 right-3 text-slate-400 hover:text-green-600 bg-slate-50 hover:bg-green-100 p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-sm"><i data-lucide="copy" class="w-4 h-4"></i> COPIAR SPEECH</button>
+                                <p class="text-sm text-slate-700 pr-24 leading-relaxed" id="speech-a">Gracias por la información, [Nombre del Cliente]. Como tienes activa la opción de recibir premios en tu cuenta, el sistema ha protegido tu dinero y lo ha convertido automáticamente en una recarga. Por favor, inicia sesión en tu cuenta de Tinka y verifica tu saldo. Con ese dinero podrás generar tu jugada nuevamente. ¡Confírmanos si logras visualizarlo para quedarnos tranquilos!</p>
+                            </div>
+                        </div>
+
+                        <!-- Result B -->
+                        <div id="result-B" class="space-y-4 hidden fade-in bg-amber-50 p-6 rounded-xl border border-amber-200">
+                            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                                <div>
+                                    <h4 class="font-bold text-amber-800 flex items-center gap-2 text-lg"><i data-lucide="alert-triangle" class="w-6 h-6"></i> Escenario B: Inyección Manual</h4>
+                                    <p class="text-sm text-amber-700 mt-2">Como no tiene la opción activa, el saldo se quedó en el aire. Retén el caso y <span class="font-bold bg-amber-200 px-1 rounded">derívalo a Digital</span> para la inyección manual del dinero en su cuenta.</p>
+                                </div>
+                                <button onclick="resetFlow()" class="text-sm text-amber-700 hover:text-amber-900 font-medium shrink-0 flex items-center gap-1 bg-amber-200/50 hover:bg-amber-200 px-3 py-1.5 rounded-lg transition-colors"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reiniciar Flujo</button>
+                            </div>
+                            <div class="bg-white border border-amber-200 rounded-lg p-4 shadow-sm relative group mt-4">
+                                <button onclick="copyText('speech-b')" class="absolute top-3 right-3 text-slate-400 hover:text-amber-600 bg-slate-50 hover:bg-amber-100 p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-sm"><i data-lucide="copy" class="w-4 h-4"></i> COPIAR SPEECH</button>
+                                <p class="text-sm text-slate-700 pr-24 leading-relaxed" id="speech-b">Gracias por revisar tu cuenta, [Nombre del Cliente]. Como el saldo no se reflejó automáticamente, ya hemos escalado tu caso a nuestra área Digital para que ingresen el monto debitado directamente al saldo de tu cuenta. Este proceso tomará un máximo de [24/48 horas]. Te notificaremos por este medio en cuanto el saldo esté disponible para que puedas realizar tu jugada.</p>
+                            </div>
+                        </div>
+
+                        <!-- Result C -->
+                        <div id="result-C" class="space-y-4 hidden fade-in bg-blue-50 p-6 rounded-xl border border-blue-200">
+                            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                                <div>
+                                    <h4 class="font-bold text-blue-800 flex items-center gap-2 text-lg"><i data-lucide="user-plus" class="w-6 h-6"></i> Escenario C: Registro + Bono</h4>
+                                    <p class="text-sm text-blue-700 mt-2">No hay cuenta para devolver el dinero. Pídele que se cree una, ofrécele el bono (1 Tinka gratis) por las molestias y <span class="font-bold bg-blue-200 px-1 rounded">deriva a Digital</span> tras su confirmación.</p>
+                                </div>
+                                <button onclick="resetFlow()" class="text-sm text-blue-700 hover:text-blue-900 font-medium shrink-0 flex items-center gap-1 bg-blue-200/50 hover:bg-blue-200 px-3 py-1.5 rounded-lg transition-colors"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reiniciar Flujo</button>
+                            </div>
+                            <div class="bg-white border border-blue-200 rounded-lg p-4 shadow-sm relative group mt-4">
+                                <button onclick="copyText('speech-c')" class="absolute top-3 right-3 text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-100 p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-sm"><i data-lucide="copy" class="w-4 h-4"></i> COPIAR SPEECH</button>
+                                <p class="text-sm text-slate-700 pr-24 leading-relaxed" id="speech-c">Entendemos la situación, [Nombre del Cliente]. Al jugar como invitado, el sistema no tiene una cuenta a la cual retornar el dinero de forma automática. Para solucionarlo y devolverte el saldo debitado, te pedimos que te registres rápidamente en nuestra web: [Link de registro]. <br><br>Como disculpas por este mal rato, una vez que nos confirmes tu registro y correo asociado, no solo te devolveremos el dinero a tu nueva cuenta, sino que te regalaremos 1 jugada de Tinka totalmente gratis. Quedamos a la espera de tu confirmación.</p>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-                <p class="text-[10px] text-slate-500 mt-2 text-center">
-                    Tus solicitudes nutren las especificaciones. Haz clic en "Añadir Módulo" en las respuestas para insertarlas.
-                </p>
-            </div>
-        </section>
+
+                <!-- Biblioteca rapida -->
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="message-square" class="text-slate-500"></i> Biblioteca Rápida de Respuestas
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Speech 1 -->
+                        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                            <div class="flex justify-between items-start mb-3">
+                                <h5 class="font-bold text-slate-800 text-sm bg-slate-100 px-2 py-1 rounded">1. Recepción Inicial</h5>
+                                <button onclick="copyText('speech-1')" class="text-slate-400 hover:text-red-600 transition-colors"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                            </div>
+                            <p class="text-sm text-slate-600 line-clamp-3" id="speech-1">Hola, [Nombre del Cliente]. Lamentamos el inconveniente con tu jugada de Tinka Express. Estamos reportando una intermitencia con el método de pago Tupay, pero tu dinero está seguro. Para ayudarte a recuperarlo de inmediato, ¿podrías indicarnos si tienes una cuenta registrada en Tinka o si jugaste únicamente como invitado?</p>
+                        </div>
+
+                        <!-- Speech Cierre -->
+                        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                            <div class="flex justify-between items-start mb-3">
+                                <h5 class="font-bold text-slate-800 text-sm bg-slate-100 px-2 py-1 rounded">5. Cierre tras gestión Digital</h5>
+                                <button onclick="copyText('speech-cierre')" class="text-slate-400 hover:text-red-600 transition-colors"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                            </div>
+                            <p class="text-sm text-slate-600 line-clamp-3" id="speech-cierre">¡Hola de nuevo, [Nombre del Cliente]! Te confirmamos que nuestra área técnica ya realizó el abono de tu dinero [+ tu Tinka gratis, si aplica Escenario C] en tu cuenta. Ya puedes ingresar, revisar tu saldo y realizar tu jugada con normalidad. Agradecemos tu paciencia y te deseamos mucha suerte en el próximo sorteo.</p>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- End case-tupay -->
+
+            <!-- CASO EJEMPLO: ERROR DE LOGIN -->
+            <div id="case-login" class="case-view hidden space-y-8 fade-in">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">Incidencia: Bucle en Inicio de Sesión</h2>
+                        <p class="text-slate-500 mt-1">El cliente se loguea pero la web lo regresa al inicio sin entrar.</p>
+                    </div>
+                    <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full border border-blue-200">
+                        Investigación
+                    </span>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 text-center space-y-4">
+                    <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="settings" class="w-8 h-8 animate-spin-slow"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800">Flujo en Construcción</h3>
+                    <p class="text-slate-500 max-w-md mx-auto">Este flujo está siendo documentado actualmente. Si tienes un caso urgente, por favor consúltale a Gema (Asistente AI) en el botón inferior derecho.</p>
+                </div>
+            </div> <!-- End case-login -->
+
+        </div>
     </main>
 
-    <!-- NOTIFICACIONES Y MODALES PERSONALIZADOS -->
-    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-brand-teal border border-teal-500 text-white font-semibold text-sm px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
-        <i class="fa-solid fa-circle-check"></i> <span id="toast-message">Especificación actualizada con éxito</span>
-    </div>
-
-    <!-- MODAL DE AGREGAR ELEMENTO -->
-    <div id="add-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center hidden p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
-            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-                <h3 id="modal-title" class="text-md font-bold text-slate-100">Añadir</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-200 text-lg transition-colors"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="modal-form-container" class="space-y-4">
-                <!-- Se llena dinámicamente de acuerdo al tipo de elemento -->
-            </div>
-            <div class="flex justify-end gap-2 mt-6 pt-4 border-t border-slate-800">
-                <button onclick="closeModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2.5 rounded-lg transition">Cancelar</button>
-                <button id="modal-submit-btn" class="bg-brand-teal hover:bg-brand-teallight text-white text-xs font-bold px-4 py-2.5 rounded-lg transition shadow-md shadow-brand-teal/20">Guardar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL DE COMPARTIR Y EXPORTAR -->
-    <div id="share-export-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center hidden p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
-            <div class="flex justify-between items-center mb-5 border-b border-slate-800 pb-3">
-                <h3 class="text-md font-bold text-slate-100 flex items-center gap-2">
-                    <i class="fa-solid fa-share-nodes text-brand-teal"></i> Compartir y Exportar Proyecto
-                </h3>
-                <button onclick="closeShareExportModal()" class="text-slate-400 hover:text-slate-200 text-lg transition-colors"><i class="fa-solid fa-xmark"></i></button>
+    <!-- Chat Widget (Gema AI) -->
+    <div id="chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <!-- Chat Window -->
+        <div id="chat-window" class="hidden bg-white w-[340px] sm:w-[400px] rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex-col mb-4 transition-all duration-300 transform h-[550px]">
+            <div class="bg-indigo-600 text-white p-4 flex items-center justify-between shadow-md z-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center border border-white/30 backdrop-blur-sm">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm leading-tight">Asistente Gema</h3>
+                        <p class="text-[11px] text-indigo-200 font-medium">Soporte IA para CX Tinka</p>
+                    </div>
+                </div>
+                <button onclick="toggleChat()" class="text-indigo-200 hover:text-white p-1 hover:bg-white/10 rounded-lg transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             
-            <div class="space-y-6">
-                <!-- Compartir por URL -->
-                <div class="space-y-2">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-link text-brand-teal"></i> Compartir enlace dinámico
-                    </h4>
-                    <p class="text-xs text-slate-400">Copia este enlace. Al abrirlo, el destinatario cargará exactamente la configuración y datos actuales de tu Workspace.</p>
-                    <div class="flex gap-2">
-                        <input id="share-link-input" readonly type="text" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-brand-teal font-mono select-all">
-                        <button onclick="copyShareLink()" class="bg-brand-teal hover:bg-brand-teallight text-white font-bold text-xs px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap shadow-md">
-                            <i class="fa-solid fa-copy"></i> Copiar
-                        </button>
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto bg-slate-50 flex flex-col gap-4 text-sm">
+                <!-- Welcome Message -->
+                <div class="flex items-start gap-2">
+                    <div class="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 mt-1">
+                        <i data-lucide="bot" class="w-4 h-4 text-indigo-600"></i>
                     </div>
-                </div>
-
-                <!-- Descargar Reportes -->
-                <div class="space-y-3">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mt-2">
-                        <i class="fa-solid fa-file-arrow-down text-brand-teal"></i> Descargar Reportes y Copias
-                    </h4>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <!-- Botón Descargar JSON -->
-                        <button onclick="downloadJSON()" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 hover:text-white p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition group shadow-sm">
-                            <i class="fa-solid fa-file-code text-2xl text-amber-500 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-xs font-bold block">JSON Backup</span>
-                            <span class="text-[9px] text-slate-400">Guarda todo el estado</span>
-                        </button>
-                        <!-- Botón Descargar Markdown -->
-                        <button onclick="downloadMarkdown()" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 hover:text-white p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition group shadow-sm">
-                            <i class="fa-solid fa-file-word text-2xl text-blue-500 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-xs font-bold block">Markdown (.md)</span>
-                            <span class="text-[9px] text-slate-400">Listo para Confluence</span>
-                        </button>
-                        <!-- Botón Descargar CSV -->
-                        <button onclick="downloadCSV()" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 hover:text-white p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition group shadow-sm">
-                            <i class="fa-solid fa-file-csv text-2xl text-emerald-500 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-xs font-bold block">CSV (Backlog)</span>
-                            <span class="text-[9px] text-slate-400">Para importar a Jira/Excel</span>
-                        </button>
-                        <!-- Botón Descargar Presentación PDF -->
-                        <button onclick="downloadPDFPresentation()" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 hover:text-white p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-center transition group shadow-sm">
-                            <i class="fa-solid fa-file-pdf text-2xl text-rose-500 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-xs font-bold block">Presentación PDF</span>
-                            <span class="text-[9px] text-slate-400">PDF listo para exponer</span>
-                        </button>
+                    <div class="bg-white border border-slate-200 text-slate-700 p-3.5 rounded-2xl rounded-tl-sm shadow-sm leading-relaxed">
+                        ¡Hola! Soy <strong>Gema</strong> 💎, tu asistente inteligente. <br><br>
+                        Puedo ayudarte a redactar respuestas personalizadas, recordar procedimientos (como el caso Tupay), o guiarte en reglas de negocio. ¿Qué necesitas hoy?
                     </div>
                 </div>
             </div>
-
-            <div class="flex justify-end gap-2 mt-6 pt-4 border-t border-slate-800">
-                <button onclick="closeShareExportModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-6 py-2.5 rounded-lg transition">Cerrar</button>
+            
+            <!-- Loading Indicator -->
+            <div id="chat-loading" class="hidden px-4 pb-3 bg-slate-50">
+                <div class="flex items-center gap-1.5 text-indigo-400 text-xs font-medium bg-indigo-50/50 w-max px-3 py-1.5 rounded-full border border-indigo-100">
+                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"></span>
+                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
+                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                    <span class="ml-1">Gema está pensando...</span>
+                </div>
+            </div>
+            
+            <div class="p-3 bg-white border-t border-slate-200">
+                <form id="chat-form" class="flex items-center gap-2" onsubmit="handleChatSubmit(event)">
+                    <input type="text" id="chat-input" placeholder="Pregunta sobre un caso o procedimiento..." class="flex-1 border border-slate-300 rounded-full pl-4 pr-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-shadow" autocomplete="off">
+                    <button type="submit" id="chat-submit-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors shadow-sm">
+                        <i data-lucide="send" class="w-4 h-4 ml-0.5"></i>
+                    </button>
+                </form>
             </div>
         </div>
+        <!-- Chat Toggle Button -->
+        <button onclick="toggleChat()" id="chat-toggle-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-5 py-3.5 shadow-xl flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 group">
+            <i data-lucide="sparkles" class="w-6 h-6 group-hover:animate-pulse"></i>
+            <span class="font-bold hidden sm:inline tracking-wide">Pregúntale a Gema</span>
+        </button>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="flex items-center gap-2 justify-center font-medium">
+        <i data-lucide="check-circle" class="w-5 h-5"></i> ¡Plantilla copiada al portapapeles!
     </div>
 
     <script>
-        // VARIABLES DE ESTADO LOCAL ACTUALIZADAS SEGÚN REQUERIMIENTOS
-        let projectData = {
-            title: "Asistente Virtual Inteligente – Experiencia Omnicanal Loterías",
-            description: "El proyecto consiste en el diseño, desarrollo e implementación de un Asistente Virtual basado en Inteligencia Artificial Generativa (GenAI) y Procesamiento de Lenguaje Natural (NLP), integrado nativamente en la interfaz de la nueva plataforma web de loterías.",
-            goal: "El objetivo principal es transformar la navegación del usuario en una experiencia guiada, lúdica y sin fricciones. El bot actuará como un copiloto conversacional que acompaña al cliente a lo largo de su customer journey, resolviendo dudas inmediatas en momentos críticos (preventa y postventa) y fomentando la retención.",
-            phases: [
-                {
-                    id: "phase-1",
-                    title: "Fase 1: Asistente de Navegación y Base de Conocimientos",
-                    tag: "Conversational FAQ & Discovery",
-                    type: "Informativa (RAG)",
-                    description: "Esta primera etapa se enfoca en la entrega de valor inmediato mediante un MVP informativo de asistencia guiada, mitigando el volumen de tickets al centro de ayuda físico o telefónico.",
-                    bullets: [
-                        "Guiado de Navegación (Onboarding): Orientación sobre exploración web, localización de sorteos favoritos y flujos de juego.",
-                        "Resolución de Dudas Frecuentes (RAG / Base de Conocimientos): Respuestas ágiles sobre mecánicas, precios, términos y juego seguro.",
-                        "Promociones y Beneficios: Cross-selling con las mejores ofertas vigentes y difusión de las ventajas y beneficios generales de jugar lotería."
-                    ]
-                },
-                {
-                    id: "phase-2",
-                    title: "Fase 2: Asistente Transaccional y Personalizado",
-                    tag: "Authenticated Conversational UX",
-                    type: "Resolutiva (APIs)",
-                    description: "La segunda etapa transforma al bot de un agente informativo a uno resolutivo y transaccional, conectándolo de forma segura con el core de la plataforma a través de APIs de usuario.",
-                    bullets: [
-                        "Gestión de Identidad Conversacional: Soporte en flujos seguros de login y validación de identidad conversacional.",
-                        "Consulta de Cuenta Personalizada: Verificación de boletos jugados, balances, retiros y validación de jugadas.",
-                        "Atención Personalizada: Sugerencia de promociones según su perfil e historial, además de alertas de beneficios y premios por cobrar de forma activa."
-                    ]
-                }
-            ],
-            milestones: [
-                {
-                    id: "ms-1",
-                    phase: "Fase 1",
-                    title: "Hito 1: Descubrimiento y Estrategia Conversacional",
-                    description: "Mapeo completo de intents iniciales y diseño de la personalidad del agente.",
-                    artifacts: ["Árboles de Decisión y Flujos en Figma", "Matriz de Intenciones (Intents) y Entidades"]
-                },
-                {
-                    id: "ms-2",
-                    phase: "Fase 1",
-                    title: "Hito 2: MVP Informativo y Promocional",
-                    description: "Construcción de la base de conocimientos RAG y despliegue del flujo de cross-selling.",
-                    artifacts: ["Base Vectorial de FAQ cargada", "Engine de Promociones Integrado"]
-                },
-                {
-                    id: "ms-3",
-                    phase: "Fase 2",
-                    title: "Hito 3: Integración de Identidad y Seguridad",
-                    description: "Acoplamiento de APIs autenticadas para control seguro de login y registro conversacional.",
-                    artifacts: ["Contrato de API OAuth Conversacional", "Middleware de Encriptación de Sesión"]
-                },
-                {
-                    id: "ms-4",
-                    phase: "Fase 2",
-                    title: "Hito 4: Personalización Transaccional Completa",
-                    description: "Despliegue de motores de recomendación inteligentes y automatización de alertas de cobro.",
-                    artifacts: ["Motor de Perfilado e Historial (Recomendaciones)", "Servicio de Notificación de Premios Pendientes"]
-                }
-            ],
-            ganttTasks: [
-                { id: "gt-1", name: "Estudio de Personas y Diseño de Intents", start: 1, duration: 2, color: "bg-teal-500" },
-                { id: "gt-2", name: "Arquitectura de Diálogos (Figma UX)", start: 2, duration: 3, color: "bg-teal-400" },
-                { id: "gt-3", name: "Carga de Base de Conocimiento y RAG (Fase 1)", start: 4, duration: 3, color: "bg-teal-600" },
-                { id: "gt-4", name: "Motor de Promociones y Cross-Selling", start: 6, duration: 2, color: "bg-emerald-500" },
-                { id: "gt-5", name: "Middleware de Identidad y OAuth (Fase 2)", start: 8, duration: 2, color: "bg-indigo-500" },
-                { id: "gt-6", name: "Integración de Cuenta, Saldos y Premios", start: 9, duration: 3, color: "bg-indigo-400" },
-                { id: "gt-7", name: "QA Funcional, Seguridad y Despliegue", start: 11, duration: 2, color: "bg-teal-500" }
-            ],
-            backlog: [
-                { id: "bl-1", name: "Definir matriz de Intents para Onboarding", status: "done", week: 1, owner: "UX Writer" },
-                { id: "bl-2", name: "Diseñar diálogos de Promociones de Cross-selling", status: "in_progress", week: 3, owner: "Product Owner" },
-                { id: "bl-3", name: "Pruebas de latencia de respuestas RAG", status: "todo", week: 5, owner: "Dev Lead" },
-                { id: "bl-4", name: "Configurar OAuth para Login en Ventana de Chat", status: "todo", week: 8, owner: "Security Engineer" },
-                { id: "bl-5", name: "Integración del Webview de Premios por Cobrar", status: "todo", week: 10, owner: "Frontend Dev" }
-            ],
-            kpis: [
-                { id: "kpi-cr", name: "Incremento del Conversion Rate (CR)", value: 12, unit: "%", desc: "Motivar a usuarios indecisos mediante el flujo dinámico de promociones." },
-                { id: "kpi-deflection", name: "Tasa de Automatización de Soporte", value: 75, unit: "%", desc: "Resolver dudas y canalizar ofertas directas sin saturar el Helpdesk." },
-                { id: "kpi-csat", name: "Mejora de Satisfacción del Cliente (CSAT)", value: 92, unit: "%", desc: "Ofrecer asistencia 24/7 inmediata y eliminar la fricción de navegación." }
-            ],
-            aiModules: []
-        };
+        // Initialize Lucide Icons
+        lucide.createIcons();
 
-        function loadProjectData() {
-            // Verificar primero si hay un proyecto compartido en la URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const sharedProject = urlParams.get('project');
-            if (sharedProject) {
-                try {
-                    // Decodificar Base64 de forma robusta para caracteres UTF-8
-                    const parsed = JSON.parse(decodeURIComponent(escape(atob(sharedProject))));
-                    projectData = parsed;
-                    saveProjectToStorage();
-                    // Limpiar la URL para evitar recargas accidentales o URLs excesivamente largas
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    setTimeout(() => {
-                        showToast("¡Proyecto compartido cargado con éxito!");
-                    }, 500);
-                    return;
-                } catch (e) {
-                    console.error("Error al cargar proyecto compartido", e);
-                }
-            }
+        // Flow Logic
+        const steps = ['step-1', 'step-2', 'step-3', 'result-A', 'result-B', 'result-C'];
 
-            const saved = localStorage.getItem("loterias_ai_project_updated");
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    projectData = { ...projectData, ...parsed };
-                } catch (e) {
-                    console.error("Error cargando datos locales:", e);
-                }
-            }
-        }
-
-        function saveProjectToStorage() {
-            localStorage.setItem("loterias_ai_project_updated", JSON.stringify(projectData));
-        }
-
-        function resetToDefaults() {
-            localStorage.removeItem("loterias_ai_project_updated");
-            location.reload();
-        }
-
-        function switchTab(tabId) {
-            const tabs = ['tab-specs', 'tab-roadmap', 'tab-milestones', 'tab-gantt', 'tab-kpis'];
-            tabs.forEach(t => {
-                const el = document.getElementById(t);
-                const btn = document.getElementById('btn-' + t);
-                if (t === tabId) {
-                    el.classList.remove('hidden');
-                    btn.classList.add('border-brand-teal', 'text-brand-teal', 'bg-slate-900/50');
-                    btn.classList.remove('border-transparent', 'text-slate-400');
-                } else {
-                    el.classList.add('hidden');
-                    btn.classList.remove('border-brand-teal', 'text-brand-teal', 'bg-slate-900/50');
-                    btn.classList.add('border-transparent', 'text-slate-400');
-                }
+        function hideAll() {
+            steps.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.classList.add('hidden');
             });
         }
 
-        function openShareExportModal() {
-            const modal = document.getElementById('share-export-modal');
-            const linkInput = document.getElementById('share-link-input');
+        function goToStep(stepNum) {
+            hideAll();
+            document.getElementById(`step-${stepNum}`).classList.remove('hidden');
+        }
+
+        function showResult(type) {
+            hideAll();
+            document.getElementById(`result-${type}`).classList.remove('hidden');
+        }
+
+        function resetFlow() {
+            hideAll();
+            document.getElementById('step-1').classList.remove('hidden');
+        }
+
+        // --- NEW: Multi-case Logic ---
+        function switchCase(caseId) {
+            // Hide all case views
+            document.querySelectorAll('.case-view').forEach(el => el.classList.add('hidden'));
+            // Show selected case
+            document.getElementById(`case-${caseId}`).classList.remove('hidden');
             
-            try {
-                // Serializar datos a JSON -> codificar UTF-8 -> codificar Base64
-                const serialized = btoa(unescape(encodeURIComponent(JSON.stringify(projectData))));
-                const shareUrl = window.location.origin + window.location.pathname + "?project=" + serialized;
-                linkInput.value = shareUrl;
-            } catch (e) {
-                console.error("Error al generar link de compartir", e);
-                linkInput.value = window.location.href;
-            }
-
-            modal.classList.remove('hidden');
-        }
-
-        function closeShareExportModal() {
-            document.getElementById('share-export-modal').classList.add('hidden');
-        }
-
-        function copyShareLink() {
-            const linkInput = document.getElementById('share-link-input');
-            linkInput.select();
-            linkInput.setSelectionRange(0, 99999); /* Para móviles */
+            // Update sidebar active states
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-red-600', 'text-white');
+                btn.classList.add('hover:bg-slate-800', 'text-slate-300');
+            });
             
-            try {
-                // Cumplimiento estricto de la directiva de Clipboard en IFrame
-                document.execCommand('copy');
-                showToast("¡Enlace de compartir copiado al portapapeles!");
-            } catch (err) {
-                console.error("No se pudo copiar con execCommand", err);
-                showToast("Por favor, copia manualmente el enlace seleccionado");
-            }
+            const activeBtn = document.getElementById(`nav-${caseId}`);
+            activeBtn.classList.remove('hover:bg-slate-800', 'text-slate-300');
+            activeBtn.classList.add('bg-red-600', 'text-white');
         }
 
-        function downloadJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectData, null, 2));
-            const dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", "proyecto_loterias_ia.json");
-            document.body.appendChild(dlAnchor);
-            dlAnchor.click();
-            dlAnchor.remove();
-            showToast("JSON descargado correctamente");
-        }
-
-        function downloadMarkdown() {
-            let md = `# ${projectData.title}\n\n`;
-            md += `## Descripción\n${projectData.description}\n\n`;
-            md += `## Misión y Objetivos de CX\n${projectData.goal}\n\n`;
-            md += `## Roadmap del Producto\n`;
-            projectData.phases.forEach(p => {
-                md += `### ${p.title} (${p.type})\n*Tag Técnico: ${p.tag}*\n${p.description}\n`;
-                p.bullets.forEach(b => { md += `- ${b}\n`; });
-                md += `\n`;
-            });
-            md += `## Milestones y Artefactos\n`;
-            projectData.milestones.forEach(m => {
-                md += `### ${m.title} (${m.phase})\n${m.description}\n*Artefactos requeridos:* ${m.artifacts.join(', ')}\n\n`;
-            });
-            md += `## Backlog de Trabajo (S1 - S12)\n`;
-            projectData.backlog.forEach(b => {
-                const statusLabel = b.status === 'done' ? '[x] Completado' : b.status === 'in_progress' ? '[/] En Progreso' : '[ ] Pendiente';
-                md += `- ${statusLabel} - Semana ${b.week}: ${b.name} (${b.owner})\n`;
-            });
-            md += `\n## Objetivos y KPIs de Experiencia\n`;
-            projectData.kpis.forEach(k => {
-                md += `- **${k.name}**: Meta ${k.value}${k.unit} - ${k.desc}\n`;
-            });
-
-            // Si hay módulos agregados por IA, los incluimos en el reporte
-            if (projectData.aiModules && projectData.aiModules.length > 0) {
-                md += `\n## Módulos de Especificación Adicional (Generados)\n`;
-                projectData.aiModules.forEach(mod => {
-                    md += `### ${mod.title}\n*Descripción:* ${mod.description}\n\n\`\`\`text\n${mod.content}\n\`\`\`\n\n`;
-                });
-            }
-
-            const dataStr = "data:text/markdown;charset=utf-8," + encodeURIComponent(md);
-            const dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", "reporte_proyecto_loterias.md");
-            document.body.appendChild(dlAnchor);
-            dlAnchor.click();
-            dlAnchor.remove();
-            showToast("Reporte en Markdown descargado");
-        }
-
-        function downloadCSV() {
-            let csv = "ID,Tarea,Estado,Semana,Responsable\n";
-            projectData.backlog.forEach(b => {
-                csv += `"${b.id}","${b.name.replace(/"/g, '""')}","${b.status}","${b.week}","${b.owner.replace(/"/g, '""')}"\n`;
-            });
-            const dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-            const dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", "backlog_tareas_loterias.csv");
-            document.body.appendChild(dlAnchor);
-            dlAnchor.click();
-            dlAnchor.remove();
-            showToast("Archivo CSV descargado con éxito");
-        }
-
-        function downloadPDFPresentation() {
-            if (typeof window.jspdf === 'undefined') {
-                showToast("Cargando generador PDF, intenta en un segundo...");
-                return;
-            }
-            try {
-                showToast("Generando PDF, por favor espera...");
-                const { jsPDF } = window.jspdf;
-                // Landscape (apaisado), milímetros, tamaño de página A4
-                const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-                
-                // --- SLIDE 1: PORTADA ---
-                doc.setFillColor(15, 23, 42); // Slate 900
-                doc.rect(0, 0, 297, 210, 'F');
-                doc.setFillColor(13, 148, 136); // Brand Teal
-                doc.rect(20, 45, 4, 120, 'F');
-                doc.setTextColor(255, 255, 255);
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(28);
-                doc.text(projectData.title, 35, 70, { maxWidth: 240 });
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(13);
-                doc.setTextColor(148, 163, 184); // Slate 400
-                doc.text(projectData.description, 35, 115, { maxWidth: 230 });
-                doc.setFontSize(11);
-                doc.setTextColor(13, 148, 136); // Teal
-                doc.text("WORKSPACE DE ARQUITECTURA CONVERSACIONAL", 35, 155);
-                doc.setFontSize(9);
-                doc.setTextColor(100, 116, 139);
-                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
-                doc.text("Página 1", 270, 195);
-
-                // --- SLIDE 2: OBJETIVOS & KPIS ---
-                doc.addPage();
-                doc.setFillColor(248, 250, 252); // Slate 50
-                doc.rect(0, 0, 297, 210, 'F');
-                doc.setFillColor(13, 148, 136);
-                doc.rect(20, 15, 3, 12, 'F');
-                doc.setTextColor(15, 23, 42);
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(20);
-                doc.text("Misión Estratégica & KPIs de Experiencia", 28, 24);
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(11);
-                doc.setTextColor(71, 85, 105);
-                doc.text(projectData.goal, 20, 40, { maxWidth: 257 });
-                
-                let colW = 79;
-                let gap = 10;
-                projectData.kpis.forEach((kpi, idx) => {
-                    if (idx > 2) return; // Limitar a 3 en slide
-                    let colX = 20 + idx * (colW + gap);
-                    doc.setFillColor(255, 255, 255);
-                    doc.roundedRect(colX, 70, colW, 100, 4, 4, 'FD');
-                    doc.setFillColor(13, 148, 136);
-                    doc.rect(colX, 70, colW, 1.5, 'F');
-                    doc.setTextColor(15, 23, 42);
-                    doc.setFont("helvetica", "bold");
-                    doc.setFontSize(12);
-                    doc.text(kpi.name, colX + 6, 82, { maxWidth: colW - 12 });
-                    doc.setFont("helvetica", "normal");
-                    doc.setFontSize(10);
-                    doc.setTextColor(100, 116, 139);
-                    doc.text(kpi.desc, colX + 6, 100, { maxWidth: colW - 12 });
-                    doc.setFont("helvetica", "bold");
-                    doc.setFontSize(32);
-                    doc.setTextColor(13, 148, 136);
-                    doc.text(`${kpi.value}${kpi.unit}`, colX + 6, 155);
-                });
-                doc.setFontSize(9);
-                doc.setTextColor(100, 116, 139);
-                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
-                doc.text("Página 2", 270, 195);
-
-                // --- SLIDES 3 y 4: FASES ---
-                projectData.phases.forEach((phase, index) => {
-                    if (index > 1) return; // Solo imprimir las primeras dos por espacio
-                    doc.addPage();
-                    doc.setFillColor(248, 250, 252);
-                    doc.rect(0, 0, 297, 210, 'F');
-                    doc.setFillColor(13, 148, 136);
-                    doc.rect(20, 15, 3, 12, 'F');
-                    doc.setTextColor(15, 23, 42);
-                    doc.setFont("helvetica", "bold");
-                    doc.setFontSize(20);
-                    doc.text(phase.title, 28, 24);
-                    doc.setFont("helvetica", "normal");
-                    doc.setFontSize(11);
-                    doc.setTextColor(13, 148, 136);
-                    doc.text(`Enfoque técnico: ${phase.tag} | Enfoque de UX: ${phase.type}`, 20, 38);
-                    doc.setTextColor(71, 85, 105);
-                    doc.text(phase.description, 20, 48, { maxWidth: 257 });
-                    doc.setFillColor(255, 255, 255);
-                    doc.roundedRect(20, 68, 257, 110, 4, 4, 'FD');
-                    doc.setFont("helvetica", "bold");
-                    doc.setFontSize(12);
-                    doc.setTextColor(15, 23, 42);
-                    doc.text(`Entregables y Pilares de la ${phase.title.split(':')[0]}:`, 28, 78);
-                    doc.setFont("helvetica", "normal");
-                    doc.setFontSize(11);
-                    doc.setTextColor(71, 85, 105);
-                    phase.bullets.forEach((bullet, bIdx) => {
-                        let textY = 92 + (bIdx * 24);
-                        doc.setFillColor(13, 148, 136);
-                        doc.circle(30, textY - 1, 1.5, 'F');
-                        doc.text(bullet, 36, textY, { maxWidth: 230 });
-                    });
-                    doc.setFontSize(9);
-                    doc.setTextColor(100, 116, 139);
-                    doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
-                    doc.text(`Página ${3 + index}`, 270, 195);
-                });
-
-                // --- SLIDE 5: MILESTONES & ARTEFACTS ---
-                doc.addPage();
-                doc.setFillColor(248, 250, 252);
-                doc.rect(0, 0, 297, 210, 'F');
-                doc.setFillColor(13, 148, 136);
-                doc.rect(20, 15, 3, 12, 'F');
-                doc.setTextColor(15, 23, 42);
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(20);
-                doc.text("Hitos de Arquitectura & Entregables", 28, 24);
-                
-                let mColW = 123;
-                let mColGap = 11;
-                projectData.milestones.forEach((ms, idx) => {
-                    if (idx > 3) return; // Limitar a 4 para no romper diseño
-                    let colX = 20 + (idx % 2) * (mColW + mColGap);
-                    let rowY = 40 + Math.floor(idx / 2) * 72;
-                    doc.setFillColor(255, 255, 255);
-                    doc.roundedRect(colX, rowY, mColW, 64, 4, 4, 'FD');
-                    doc.setFillColor(13, 148, 136);
-                    doc.rect(colX, rowY, 1.5, 64, 'F');
-                    doc.setFontSize(8);
-                    doc.setFont("helvetica", "bold");
-                    doc.setTextColor(13, 148, 136);
-                    doc.text(ms.phase.toUpperCase(), colX + 6, rowY + 8);
-                    doc.setFontSize(11);
-                    doc.setTextColor(15, 23, 42);
-                    doc.text(ms.title, colX + 6, rowY + 16, { maxWidth: mColW - 12 });
-                    doc.setFont("helvetica", "normal");
-                    doc.setFontSize(9.5);
-                    doc.setTextColor(100, 116, 139);
-                    doc.text(ms.description, colX + 6, rowY + 28, { maxWidth: mColW - 12 });
-                    doc.setFont("helvetica", "bold");
-                    doc.setFontSize(8.5);
-                    doc.setTextColor(71, 85, 105);
-                    doc.text(`Entregables: ${ms.artifacts.join(', ')}`, colX + 6, rowY + 54, { maxWidth: mColW - 12 });
-                });
-                doc.setFontSize(9);
-                doc.setTextColor(100, 116, 139);
-                doc.text("Loterías IA - Documento de Planeamiento de Producto", 20, 195);
-                doc.text("Página 5", 270, 195);
-
-                // Guardar PDF
-                doc.save("Presentacion_Proyecto_Loterias_IA.pdf");
-                showToast("Presentación descargada como PDF");
-            } catch (err) {
-                console.error("Error al exportar PDF:", err);
-                showToast("Hubo un error al generar la presentación PDF. ¿Página cargada por completo?");
-            }
-        }
-
-        function toggleEdit(field) {
-            const viewMode = document.getElementById('desc-view-mode');
-            const editMode = document.getElementById('desc-edit-mode');
-            const btnText = document.getElementById('btn-edit-text-desc');
-
-            if (editMode.classList.contains('hidden')) {
-                viewMode.classList.add('hidden');
-                editMode.classList.remove('hidden');
-                btnText.innerText = "Cancelar";
-                
-                document.getElementById('edit-project-title').value = projectData.title;
-                document.getElementById('edit-project-desc').value = projectData.description;
-                document.getElementById('edit-project-goal').value = projectData.goal;
-            } else {
-                viewMode.classList.remove('hidden');
-                editMode.classList.add('hidden');
-                btnText.innerText = "Editar";
-            }
-        }
-
-        function saveDescription() {
-            projectData.title = document.getElementById('edit-project-title').value;
-            projectData.description = document.getElementById('edit-project-desc').value;
-            projectData.goal = document.getElementById('edit-project-goal').value;
-
-            document.getElementById('project-title-display').innerText = projectData.title;
-            document.getElementById('project-desc-display').innerText = projectData.description;
-            document.getElementById('project-goal-display').innerText = projectData.goal;
-
-            toggleEdit();
-            saveProjectToStorage();
-            showToast("Descripción general actualizada con éxito");
-        }
-
-        function renderPhases() {
-            const list = document.getElementById('phases-list');
-            list.innerHTML = '';
-
-            projectData.phases.forEach((phase) => {
-                const card = document.createElement('div');
-                card.className = "bg-brand-card border border-brand-border rounded-2xl p-6 relative transition hover:border-slate-600 shadow-lg group";
-                
-                let bulletsHtml = '';
-                phase.bullets.forEach(b => {
-                    bulletsHtml += `
-                        <li class="flex items-start gap-2.5 text-sm text-slate-300">
-                            <span class="text-brand-teal text-xs mt-1 shrink-0"><i class="fa-solid fa-circle-check"></i></span>
-                            <span>${b}</span>
-                        </li>
-                    `;
-                });
-
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-3 gap-2 flex-wrap md:flex-nowrap">
-                        <div>
-                            <span class="text-[10px] font-bold text-brand-teal tracking-widest uppercase mb-1 block">${phase.tag}</span>
-                            <h4 class="text-lg font-bold text-slate-100">${phase.title}</h4>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="bg-slate-900 border border-brand-border px-3 py-1 rounded-full text-[10px] font-semibold text-slate-300 h-fit">${phase.type}</span>
-                            <button onclick="deletePhase('${phase.id}')" class="text-slate-500 hover:text-red-400 p-1.5 transition rounded-md hover:bg-slate-800 opacity-0 group-hover:opacity-100" title="Eliminar fase"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                    </div>
-                    <p class="text-sm text-slate-400 mb-4 leading-relaxed">${phase.description}</p>
-                    <ul class="space-y-2.5 border-t border-slate-800/80 pt-4">
-                        ${bulletsHtml}
-                    </ul>
-                `;
-                list.appendChild(card);
-            });
-        }
-
-        function deletePhase(id) {
-            projectData.phases = projectData.phases.filter(p => p.id !== id);
-            saveProjectToStorage();
-            renderPhases();
-            showToast("Fase eliminada del Roadmap");
-        }
-
-        function openAddPhaseModal() {
-            document.getElementById('modal-title').innerText = "Añadir Nueva Fase al Roadmap";
-            const form = document.getElementById('modal-form-container');
-            form.innerHTML = `
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Título de la Fase</label>
-                    <input id="new-phase-title" type="text" placeholder="Ej: Fase 3: Integración de Pagos" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Tag Técnico</label>
-                        <input id="new-phase-tag" type="text" placeholder="Ej: Payments Engine" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Enfoque (Tipo)</label>
-                        <input id="new-phase-type" type="text" placeholder="Ej: Transaccional" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Descripción del Objetivo</label>
-                    <textarea id="new-phase-desc" rows="2" placeholder="Describe brevemente la meta de esta fase..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal resize-none"></textarea>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Entregables (Uno por línea)</label>
-                    <textarea id="new-phase-bullets" rows="3" placeholder="Flujo de Carrito de Compras&#10;Motor de Pago Stripe" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal resize-none"></textarea>
-                </div>
-            `;
-            
-            document.getElementById('modal-submit-btn').onclick = submitNewPhase;
-            document.getElementById('add-modal').classList.remove('hidden');
-        }
-
-        function submitNewPhase() {
-            const title = document.getElementById('new-phase-title').value;
-            const tag = document.getElementById('new-phase-tag').value;
-            const type = document.getElementById('new-phase-type').value;
-            const description = document.getElementById('new-phase-desc').value;
-            const bulletsRaw = document.getElementById('new-phase-bullets').value;
-
-            if(!title || !description) {
-                showToast("Por favor, completa el título y la descripción.");
-                return;
-            }
-
-            const bullets = bulletsRaw.split('\n').filter(b => b.trim() !== "");
-
-            const newPhase = {
-                id: "phase-" + Date.now(),
-                title,
-                tag: tag || "Conversational UX Add-on",
-                type: type || "Iterativo",
-                description,
-                bullets: bullets.length > 0 ? bullets : ["En definición por arquitectura"]
-            };
-
-            projectData.phases.push(newPhase);
-            saveProjectToStorage();
-            renderPhases();
-            closeModal();
-            showToast("Nueva fase agregada al Roadmap");
-        }
-
-        function renderMilestones() {
-            const container = document.getElementById('milestones-container');
-            container.innerHTML = '';
-
-            projectData.milestones.forEach(ms => {
-                const card = document.createElement('div');
-                card.className = "bg-brand-card border border-brand-border rounded-xl p-5 shadow-md flex flex-col justify-between group hover:border-slate-600 transition-colors";
-                
-                let artifactsList = '';
-                ms.artifacts.forEach(art => {
-                    artifactsList += `
-                        <div class="flex items-center gap-2 text-[11px] text-slate-300 bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
-                            <i class="fa-solid fa-file-signature text-brand-teal text-[10px]"></i>
-                            <span>${art}</span>
-                        </div>
-                    `;
-                });
-
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-[9px] font-bold text-brand-teal uppercase tracking-widest bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20">${ms.phase}</span>
-                            <button onclick="deleteMilestone('${ms.id}')" class="text-slate-500 hover:text-red-400 p-1 transition opacity-0 group-hover:opacity-100 rounded hover:bg-slate-800"><i class="fa-solid fa-trash-can text-[11px]"></i></button>
-                        </div>
-                        <h4 class="text-sm font-bold text-slate-100 mb-1.5 leading-tight">${ms.title}</h4>
-                        <p class="text-xs text-slate-400 mb-4 leading-relaxed">${ms.description}</p>
-                    </div>
-                    <div class="space-y-2 border-t border-slate-800/80 pt-3 mt-auto">
-                        <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest block">Artefactos requeridos:</span>
-                        <div class="grid grid-cols-1 gap-1.5">
-                            ${artifactsList}
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function deleteMilestone(id) {
-            projectData.milestones = projectData.milestones.filter(m => m.id !== id);
-            saveProjectToStorage();
-            renderMilestones();
-            showToast("Hito removido del tablero");
-        }
-
-        function renderGanttAndBacklog() {
-            // Render Gantt Chart
-            const ganttContainer = document.getElementById('gantt-rows');
-            ganttContainer.innerHTML = '';
-
-            projectData.ganttTasks.forEach(task => {
-                const row = document.createElement('div');
-                row.className = "grid grid-cols-13 gap-2 items-center text-xs group hover:bg-slate-800/30 p-1 -mx-1 rounded-lg transition-colors";
-                
-                // Celdas de semanas activadas
-                let weeksHtml = '<div class="col-span-12 grid grid-cols-12 gap-1">';
-                for (let w = 1; w <= 12; w++) {
-                    const isActive = w >= task.start && w < (task.start + task.duration);
-                    weeksHtml += `
-                        <div class="h-6 rounded-md ${isActive ? task.color + ' shadow-sm' : 'bg-slate-900 border border-slate-800/60'} transition-all" 
-                             title="${isActive ? `${task.name}: Semana ${task.start} a ${task.start + task.duration - 1}` : `Semana ${w}`}">
-                        </div>
-                    `;
-                }
-                weeksHtml += '</div>';
-
-                row.innerHTML = `
-                    <div class="col-span-4 font-medium text-slate-300 truncate pl-1" title="${task.name}">${task.name}</div>
-                    ${weeksHtml}
-                `;
-                ganttContainer.appendChild(row);
-            });
-
-            // Render Kanban Columns
-            const colTodo = document.getElementById('col-todo');
-            const colProgress = document.getElementById('col-progress');
-            const colDone = document.getElementById('col-done');
-
-            colTodo.innerHTML = '';
-            colProgress.innerHTML = '';
-            colDone.innerHTML = '';
-
-            let counts = { todo: 0, in_progress: 0, done: 0 };
-
-            projectData.backlog.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "bg-brand-card border border-brand-border rounded-xl p-3.5 shadow-md hover:border-slate-500 transition cursor-pointer relative group flex flex-col gap-2";
-                card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <span class="text-[9px] font-bold text-slate-400 bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded">Semana ${item.week}</span>
-                        <div class="flex gap-1.5 opacity-0 group-hover:opacity-100 transition bg-slate-900 px-1.5 py-0.5 rounded-md border border-slate-700">
-                            <button onclick="cycleTaskStatus('${item.id}')" class="text-brand-teallight hover:text-white transition-colors" title="Mover tarea"><i class="fa-solid fa-arrows-spin text-[11px]"></i></button>
-                            <span class="text-slate-600">|</span>
-                            <button onclick="deleteBacklogTask('${item.id}')" class="text-slate-400 hover:text-red-400 transition-colors" title="Eliminar"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-200 font-medium leading-snug">${item.name}</p>
-                    <div class="flex justify-between items-center text-[10px] text-slate-500 font-medium mt-1">
-                        <span class="truncate flex items-center gap-1"><i class="fa-solid fa-circle-user text-slate-600"></i>${item.owner}</span>
-                    </div>
-                `;
-
-                if (item.status === 'todo') {
-                    colTodo.appendChild(card);
-                    counts.todo++;
-                } else if (item.status === 'in_progress') {
-                    colProgress.appendChild(card);
-                    counts.in_progress++;
-                } else if (item.status === 'done') {
-                    colDone.appendChild(card);
-                    counts.done++;
-                }
-            });
-
-            // Actualizar contadores visuales
-            document.getElementById('count-todo').innerText = counts.todo;
-            document.getElementById('count-progress').innerText = counts.in_progress;
-            document.getElementById('count-done').innerText = counts.done;
-        }
-
-        function cycleTaskStatus(id) {
-            const task = projectData.backlog.find(t => t.id === id);
-            if (task) {
-                if (task.status === 'todo') task.status = 'in_progress';
-                else if (task.status === 'in_progress') task.status = 'done';
-                else if (task.status === 'done') task.status = 'todo';
-                
-                saveProjectToStorage();
-                renderGanttAndBacklog();
-            }
-        }
-
-        function deleteBacklogTask(id) {
-            projectData.backlog = projectData.backlog.filter(t => t.id !== id);
-            saveProjectToStorage();
-            renderGanttAndBacklog();
-            showToast("Tarea eliminada del Backlog");
-        }
-
-        function openAddTaskModal() {
-            document.getElementById('modal-title').innerText = "Añadir Tarea al Backlog";
-            const form = document.getElementById('modal-form-container');
-            form.innerHTML = `
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nombre de la Tarea / Entregable</label>
-                    <input id="new-task-name" type="text" placeholder="Ej: Pruebas de Carga RAG" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Dueño (Owner)</label>
-                        <input id="new-task-owner" type="text" placeholder="Ej: QA Engineer" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Semana Estimada</label>
-                        <input id="new-task-week" type="number" min="1" max="12" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal">
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('modal-submit-btn').onclick = submitNewTask;
-            document.getElementById('add-modal').classList.remove('hidden');
-        }
-
-        function submitNewTask() {
-            const name = document.getElementById('new-task-name').value;
-            const owner = document.getElementById('new-task-owner').value;
-            const week = parseInt(document.getElementById('new-task-week').value);
-
-            if(!name) {
-                showToast("El nombre de la tarea es obligatorio.");
-                return;
-            }
-
-            const newTask = {
-                id: "bl-" + Date.now(),
-                name,
-                status: "todo",
-                week: week || 1,
-                owner: owner || "Product Team"
-            };
-
-            projectData.backlog.push(newTask);
-            saveProjectToStorage();
-            renderGanttAndBacklog();
-            closeModal();
-            showToast("Nueva tarea encolada en el backlog");
-        }
-
-        function renderKPIs() {
-            const grid = document.getElementById('kpi-grid');
-            grid.innerHTML = '';
-
-            projectData.kpis.forEach(kpi => {
-                const card = document.createElement('div');
-                card.className = "bg-brand-card border border-brand-border rounded-2xl p-5 relative transition hover:border-slate-500 shadow-lg flex flex-col justify-between group";
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="text-sm font-bold text-slate-200 leading-tight pr-4">${kpi.name}</h4>
-                            <button onclick="deleteKPI('${kpi.id}')" class="text-slate-500 hover:text-red-400 p-1 transition opacity-0 group-hover:opacity-100 rounded hover:bg-slate-800 absolute top-4 right-4"><i class="fa-solid fa-trash-can text-xs"></i></button>
-                        </div>
-                        <p class="text-xs text-slate-400 mb-5 leading-relaxed">${kpi.desc}</p>
-                    </div>
-                    <div class="space-y-2.5 border-t border-slate-800/80 pt-4 mt-auto">
-                        <div class="flex justify-between items-end">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Valor Objetivo Meta</span>
-                            <span class="text-2xl font-black text-brand-teal leading-none">${kpi.value}<span class="text-lg">${kpi.unit}</span></span>
-                        </div>
-                        <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden border border-slate-800">
-                            <div class="bg-gradient-to-r from-teal-500 to-emerald-400 h-1.5 rounded-full" style="width: ${Math.min(kpi.value, 100)}%"></div>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        function deleteKPI(id) {
-            projectData.kpis = projectData.kpis.filter(k => k.id !== id);
-            saveProjectToStorage();
-            renderKPIs();
-            showToast("KPI removido del tablero");
-        }
-
-        function openAddKPIModal() {
-            document.getElementById('modal-title').innerText = "Añadir Nuevo Objetivo / KPI";
-            const form = document.getElementById('modal-form-container');
-            form.innerHTML = `
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nombre del Indicador</label>
-                    <input id="new-kpi-name" type="text" placeholder="Ej: Reducción del tiempo de respuesta" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Meta Numérica</label>
-                        <input id="new-kpi-val" type="number" placeholder="80" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Unidad de Medida</label>
-                        <input id="new-kpi-unit" type="text" placeholder="%, min, USD" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Descripción del Impacto en CX</label>
-                    <textarea id="new-kpi-desc" rows="3" placeholder="Explica cómo esta métrica mejora la experiencia..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal resize-none"></textarea>
-                </div>
-            `;
-            
-            document.getElementById('modal-submit-btn').onclick = submitNewKPI;
-            document.getElementById('add-modal').classList.remove('hidden');
-        }
-
-        function submitNewKPI() {
-            const name = document.getElementById('new-kpi-name').value;
-            const val = document.getElementById('new-kpi-val').value;
-            const unit = document.getElementById('new-kpi-unit').value;
-            const desc = document.getElementById('new-kpi-desc').value;
-
-            if(!name || !val) {
-                showToast("Nombre y valor meta son obligatorios.");
-                return;
-            }
-
-            const newKpi = {
-                id: "kpi-" + Date.now(),
-                name,
-                value: parseFloat(val),
-                unit: unit || "%",
-                desc: desc || "Indicador clave de rendimiento."
-            };
-
-            projectData.kpis.push(newKpi);
-            saveProjectToStorage();
-            renderKPIs();
-            closeModal();
-            showToast("Métrica de negocio guardada");
-        }
-
-        function closeModal() {
-            document.getElementById('add-modal').classList.add('hidden');
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-message').innerText = message;
-            toast.classList.remove('translate-y-24', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-            setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
-                toast.classList.add('translate-y-24', 'opacity-0');
-            }, 3000);
-        }
-
-        
-        // 👇 PASO 1: PEGA TU CLAVE DE API AQUÍ 👇
-        const apiKey = "AQ.Ab8RN6IieCd1Cypq_gM2U0PEvblOhQ0r_OLee8eoYGS9cIAXSA"; 
-        // 👆 ---------------------------------- 👆
-
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        // --- NEW: Gema AI Chat Logic ---
+        let isChatOpen = false;
         let chatHistory = [];
+        const apiKey = ""; // API Key manejada automáticamente por el entorno
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+        
+        // System Prompt que define el comportamiento de la IA
+        const systemPrompt = `Eres Gema, un asistente de Inteligencia Artificial interno para el equipo de Experiencia al Cliente (CX) de la lotería Tinka. 
+        Tu objetivo es ayudar a los asesores a resolver dudas, darles respuestas para que copien y peguen a los clientes, y guiarles en procedimientos.
+        Reglas:
+        1. Sé empática, concisa y directa. Eres una compañera de trabajo.
+        2. Si te piden redactar un mensaje para un cliente, hazlo con tono profesional, amable y pidiendo disculpas por los inconvenientes.
+        3. Formatea tus respuestas usando saltos de línea para que sea fácil de leer en un chat pequeño.`;
 
-        function handleChatKeydown(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendChatMessage();
-            }
-        }
-
-        function buildSystemPrompt() {
-            return `Eres un Arquitecto de IA Conversacional experto en plataformas web de Loterías.
-Tu objetivo es ayudarme a diseñar los flujos y requerimientos del proyecto: "${projectData.title}".
-Fase 1: Promociones, Cross-selling y RAG.
-Fase 2: Identidad conversacional, alertas de premios pendientes y saldos.
-Responde siempre generando un módulo JSON estructurado dentro de tu respuesta usando este formato estricto:
-
-\`\`\`json-module
-{
-    "title": "Título corto y descriptivo",
-    "description": "Explicación breve de este entregable.",
-    "content": "Todo el contenido detallado del flujo, prompt o arquitectura en formato markdown."
-}
-\`\`\`
-Sé directo, profesional y enfocado en la usabilidad del cliente (UX).`;
-        }
-
-        async function sendChatMessage(customText = null) {
-            const inputEl = document.getElementById('chat-input');
-            const userMessage = customText || inputEl.value.trim();
-            if (!userMessage) return;
-
-            if (!customText) inputEl.value = '';
-
-            appendMessage("Usuario", userMessage, "bg-slate-800 border border-slate-700 text-slate-100 self-end max-w-[85%] relative shadow-md");
-
-            const loadingId = "msg-loading-" + Date.now();
-            appendLoadingBubble(loadingId);
-
-            chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
-
-            // VALIDACIÓN ESTRICTA: MOCK SYSTEM SI NO HAY API KEY
-            if (!apiKey || apiKey === "") {
+        function toggleChat() {
+            const chatWindow = document.getElementById('chat-window');
+            isChatOpen = !isChatOpen;
+            
+            if (isChatOpen) {
+                chatWindow.classList.remove('hidden');
+                chatWindow.classList.add('flex');
                 setTimeout(() => {
-                    document.getElementById(loadingId).remove();
-                    // Ejecuta el Mock System reparado
-                    processAndRenderMockResponse(userMessage);
-                    chatHistory.pop(); // Revertimos historial para no llenarlo de mock
-                }, 800); // Simulamos tiempo de carga de la IA
-                return;
+                    chatWindow.classList.remove('scale-95', 'opacity-0');
+                    chatWindow.classList.add('scale-100', 'opacity-100');
+                    document.getElementById('chat-input').focus();
+                }, 10);
+            } else {
+                chatWindow.classList.remove('scale-100', 'opacity-100');
+                chatWindow.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    chatWindow.classList.add('hidden');
+                    chatWindow.classList.remove('flex');
+                }, 300);
             }
+        }
 
-            // LLAMADA REAL A GEMINI API
-            const payloadHistory = [...chatHistory];
-            const systemPrompt = buildSystemPrompt();
+        function appendMessage(role, text) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex items-start gap-2 fade-in';
+            
+            if (role === 'user') {
+                messageDiv.classList.add('flex-row-reverse');
+                messageDiv.innerHTML = `
+                    <div class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center shrink-0 mt-1">
+                        <i data-lucide="user" class="w-4 h-4 text-slate-600"></i>
+                    </div>
+                    <div class="bg-indigo-600 text-white p-3.5 rounded-2xl rounded-tr-sm shadow-sm text-sm">
+                        ${escapeHTML(text)}
+                    </div>
+                `;
+            } else {
+                // Formatear texto simple para la IA (saltos de línea)
+                const formattedText = escapeHTML(text).replace(/\n/g, '<br>');
+                messageDiv.innerHTML = `
+                    <div class="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 mt-1">
+                        <i data-lucide="bot" class="w-4 h-4 text-indigo-600"></i>
+                    </div>
+                    <div class="bg-white border border-slate-200 text-slate-700 p-3.5 rounded-2xl rounded-tl-sm shadow-sm text-sm leading-relaxed">
+                        ${formattedText}
+                    </div>
+                `;
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            lucide.createIcons({ root: messageDiv });
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
 
-            const payload = {
-                contents: payloadHistory,
-                systemInstruction: { parts: [{ text: systemPrompt }] }
-            };
+        // Para evitar inyecciones XSS en el chat
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+
+        async function handleChatSubmit(e) {
+            e.preventDefault();
+            const inputField = document.getElementById('chat-input');
+            const submitBtn = document.getElementById('chat-submit-btn');
+            const loadingIndicator = document.getElementById('chat-loading');
+            
+            const message = inputField.value.trim();
+            if (!message) return;
+
+            // UI Updates
+            appendMessage('user', message);
+            inputField.value = '';
+            inputField.disabled = true;
+            submitBtn.disabled = true;
+            loadingIndicator.classList.remove('hidden');
+            
+            // Add user message to memory
+            chatHistory.push({ role: "user", parts: [{ text: message }] });
 
             try {
+                const payload = {
+                    contents: chatHistory,
+                    systemInstruction: { parts: [{ text: systemPrompt }] }
+                };
+
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
-                document.getElementById(loadingId).remove();
-
-                if (response.ok) {
-                    const result = await response.json();
-                    const resultText = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
-                    chatHistory.push({ role: "model", parts: [{ text: resultText }] });
-                    renderAIResponse(resultText);
+                
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates[0] && result.candidates[0].content) {
+                    const replyText = result.candidates[0].content.parts[0].text;
+                    appendMessage('model', replyText);
+                    chatHistory.push(result.candidates[0].content); // Save AI response to memory
                 } else {
-                    console.error("Error de API:", response.status);
-                    processAndRenderMockResponse(userMessage); // Fallback a Mock si falla la red
+                    appendMessage('model', "Lo siento, hubo un problema al procesar mi respuesta. ¿Podrías intentar de nuevo?");
                 }
-            } catch (err) {
-                console.error("Error de conexión:", err);
-                if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
-                processAndRenderMockResponse(userMessage); // Fallback a Mock si falla la red
+            } catch (error) {
+                console.error(error);
+                appendMessage('model', "⚠️ Error de conexión. Revisa tu internet e intenta nuevamente.");
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                inputField.disabled = false;
+                submitBtn.disabled = false;
+                inputField.focus();
             }
         }
 
-        function appendMessage(sender, text, classes) {
-            const chatBox = document.getElementById('chat-messages');
-            const bubble = document.createElement('div');
-            bubble.className = `${classes} p-4 rounded-2xl space-y-1.5 relative`;
+        // Copy to clipboard function
+        function copyText(elementId) {
+            const textToCopy = document.getElementById(elementId).innerText;
             
-            const senderIcon = sender === "Usuario" ? "fa-solid fa-user-tie" : "fa-solid fa-robot";
-            const senderColor = sender === "Usuario" ? "text-slate-400" : "text-brand-teal";
-
-            bubble.innerHTML = `
-                <div class="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest ${senderColor}">
-                    <i class="${senderIcon}"></i> ${sender}
-                </div>
-                <div class="text-[13px] leading-relaxed whitespace-pre-wrap">${escapeHTML(text)}</div>
-            `;
-            chatBox.appendChild(bubble);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function appendLoadingBubble(id) {
-            const chatBox = document.getElementById('chat-messages');
-            const bubble = document.createElement('div');
-            bubble.id = id;
-            bubble.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 max-w-[80%] self-start relative shadow-md flex items-center gap-3";
-            bubble.innerHTML = `
-                <div class="w-4 h-4 border-2 border-brand-teal border-t-transparent rounded-full animate-spin shrink-0"></div>
-                <span class="text-xs text-slate-400 font-medium">Analizando arquitectura del roadmap...</span>
-            `;
-            chatBox.appendChild(bubble);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-            );
-        }
-
-        
-        // CORRECCIÓN PRINCIPAL: El Mock System ahora genera y formatea el JSON 
-        // exactamente igual que lo haría Gemini, garantizando que el regex lo atrape.
-        function processAndRenderMockResponse(userInput) {
-            const normalized = userInput.toLowerCase();
-            let mockIntroText = "";
-            let jsonModule = null;
-
-            if (normalized.includes("promocion") || normalized.includes("promo") || normalized.includes("cross")) {
-                mockIntroText = "He analizado los requerimientos de la **Fase 1**. He diseñado una propuesta estructurada para el flujo de **Promociones y Beneficios**. Este flujo proactivo fomenta el cross-selling en caliente basándose en los botes activos más jugosos.";
-                jsonModule = {
-                    title: "Flujo: Promociones y Cross-selling (Fase 1)",
-                    description: "Pasos estructurados para sugerir proactivamente compras basadas en los pozos más altos del día.",
-                    content: "### Paso 1: Detección de Inactividad\nSi el usuario permanece 15 segundos en el Home, el bot se abre proactivamente.\n**Bot:** 🎁 ¡Hola! Hoy tenemos un pozo histórico en MegaLotto. ¿Te gustaría ver las promos exclusivas de hoy?\n*[Botón: Sí, ver promos]* *[Botón: Solo explorar]*\n\n### Paso 2: Despliegue de Valor\nSi acepta, se muestran los beneficios.\n**Bot:** 🎰 ¡Perfecto! Al comprar tu primer boleto online hoy, te duplicamos el monto. Además los cobros a tu cuenta son automáticos y 100% seguros.\n\n### Paso 3: Call to Action Directo\n**Bot:** ¿Te genero una jugada automática de la suerte para el sorteo de esta noche?\n*[Botón: ¡Sí, generar y comprar!]*"
-                };
-            } else if (normalized.includes("alerta") || normalized.includes("premio") || normalized.includes("f2") || normalized.includes("fase 2")) {
-                mockIntroText = "He estructurado un flujo crítico para la **Fase 2**. Este esquema detalla la **Atención Personalizada** mediante notificaciones proactivas de premios por cobrar, cruzando la información del historial de la cuenta de forma segura.";
-                jsonModule = {
-                    title: "Flujo: Alertas de Premios Pendientes (Fase 2)",
-                    description: "Flujo autenticado que notifica al jugador sobre ganancias no reclamadas.",
-                    content: "### Precondición: Sesión Autenticada\nEl usuario ingresa al portal ya logueado con su Token OAuth activo.\n\n### Paso 1: Intercepción Positiva (Al abrir el Chat)\nEl bot lee el endpoint de saldos.\n**Bot:** ¡Hola Carlos! 🎉 Tengo excelentes noticias. Revisé tu historial y tu boleto del 14 de Julio resultó ganador.\n\n### Paso 2: Detalles Claros y Sin Fricción\n**Bot:** Ganaste **$150.00 USD** en el Sorteo Nocturno. El dinero está disponible en tu billetera digital de inmediato.\n\n### Paso 3: Acción Resolutiva Continua\n**Bot:** ¿Qué te gustaría hacer con tu premio?\n*[Botón: Transferir a mi cuenta bancaria]* *[Botón: Comprar para el sorteo de hoy]*"
-                };
-            } else if (normalized.includes("artefacto") || normalized.includes("ux") || normalized.includes("diseño")) {
-                mockIntroText = "He compilado el listado técnico de los **Artefactos UX y de Desarrollo** necesarios para garantizar una transición fluida entre el equipo de diseño y los desarrolladores del ecosistema de Loterías.";
-                jsonModule = {
-                    title: "Especificación de Artefactos Conversacionales",
-                    description: "Handover técnico y de diseño para la implementación del bot.",
-                    content: "1. **Matriz de Intenciones (NLU/NLP):** Documento mapeando los 'utterances' (frases del usuario) con sus intenciones de negocio correspondientes (Ej: 'quiero mi premio' -> Intent: `Reclamo_Premio`).\n2. **Árboles de Decisión (Figma/Miro):** Diagramas de flujo lógicos con caminos felices (Happy paths) y gestión de errores (Fallbacks).\n3. **Base Vectorial (RAG):** Repositorio JSON con las preguntas y respuestas frecuentes curadas para la Fase 1.\n4. **Contratos API (Swagger):** Especificación estricta de cómo el bot consultará los saldos al core bancario en la Fase 2."
-                };
-            } else {
-                mockIntroText = "Interesante aproximación. He procesado tu solicitud y he generado una estructura conceptual basada en tus indicaciones. Puedes revisarla y añadirla a tus Especificaciones si consideras que aporta valor a la arquitectura de las Loterías.";
-                jsonModule = {
-                    title: "Nuevo Módulo Conversacional: Extensión",
-                    description: `Alcance estructurado generado a partir de la instrucción personalizada.`,
-                    content: `### 1. Definición del Requerimiento\nSe solicita al equipo de IA y Desarrollo integrar este flujo dentro de las lógicas de negocio principales.\n\n### 2. Implicaciones Técnicas\n*   Actualización del middleware de NLP.\n*   Creación de respuestas estandarizadas de contingencia para mitigar fallos en este flujo.\n\n### 3. Criterios de Aceptación (QA)\nEl bot debe responder en menos de 2 segundos y mantener el contexto de la conversación activa.`
-                };
-            }
-
-            // CORRECCIÓN CLAVE: Empaquetar el JSON exactamente como lo hace la API real
-            // usando la sintaxis de markdown especial ```json-module que el parser espera.
-            const finalSimulatedText = `${mockIntroText}\n\n\`\`\`json-module\n${JSON.stringify(jsonModule, null, 2)}\n\`\`\``;
-
-            // Enviar el texto simulado al renderizador que extrae y dibuja la tarjeta
-            renderAIResponse(finalSimulatedText);
-        }
-
-        // Renderizador unificado para API Real o Mock
-        function renderAIResponse(text) {
-            const chatBox = document.getElementById('chat-messages');
-            const bubble = document.createElement('div');
-            bubble.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 max-w-[95%] self-start relative shadow-lg flex flex-col";
+            // Create a temporary textarea to hold the text
+            const tempTextArea = document.createElement("textarea");
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            tempTextArea.setSelectionRange(0, 99999); // For mobile devices
             
-            let mainText = text;
-            let jsonModule = null;
-
-            // Parser estricto para extraer el bloque de código JSON
-            const jsonBlockRegex = /```json-module([\s\S]*?)```/;
-            const match = text.match(jsonBlockRegex);
-
-            if (match && match[1]) {
-                try {
-                    jsonModule = JSON.parse(match[1].trim());
-                    mainText = text.replace(jsonBlockRegex, '').trim();
-                } catch (e) {
-                    console.error("Error parseando módulo dinámico:", e);
-                }
-            }
-
-            // Inyectar el texto introductorio de la IA
-            bubble.innerHTML = `
-                <div class="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-brand-teal mb-2">
-                    <i class="fa-solid fa-robot"></i> Copiloto de Producto
-                </div>
-                <div class="text-[13px] leading-relaxed whitespace-pre-wrap text-slate-300">${escapeHTML(mainText)}</div>
-            `;
-
-            // Si encontró y parseó el JSON, inyectar el PANEL INTERACTIVO DE IMPORTACIÓN
-            if (jsonModule) {
-                const importPanel = document.createElement('div');
-                importPanel.className = "mt-4 p-4 bg-slate-950 rounded-xl border border-teal-900/50 flex flex-col gap-3 shadow-inner";
-                
-                // Limpiar comillas para el evento onclick en línea
-                const safeJsonStr = JSON.stringify(jsonModule).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-
-                importPanel.innerHTML = `
-                    <div class="flex items-center gap-2 text-xs font-bold text-slate-200">
-                        <i class="fa-solid fa-wand-magic-sparkles text-brand-teal"></i> ¡Módulo listo para el Tablero!
-                    </div>
-                    <div class="bg-slate-900/50 p-3 rounded border border-slate-800/80">
-                        <strong class="text-xs text-brand-teal block mb-1">${escapeHTML(jsonModule.title)}</strong>
-                        <p class="text-[11px] text-slate-400 leading-snug">${escapeHTML(jsonModule.description)}</p>
-                    </div>
-                    <button onclick="importAIModule('${safeJsonStr}')" class="bg-brand-teal hover:bg-brand-teallight text-white font-bold text-xs py-2.5 px-4 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg w-full mt-1">
-                        <i class="fa-solid fa-folder-plus text-sm"></i> Añadir Módulo a Especificaciones
-                    </button>
-                `;
-                bubble.appendChild(importPanel);
-            }
-
-            chatBox.appendChild(bubble);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        
-        // CORRECCIÓN: Al importar, forzamos un salto a la pestaña de 'Especificaciones'
-        // para que siempre veas dónde se guarda la información (Evita confusión visual)
-        function importAIModule(jsonString) {
             try {
-                // Decodificar la cadena segura de vuelta a objeto JSON
-                const moduleData = JSON.parse(jsonString.replace(/&apos;/g, "'").replace(/&quot;/g, '"'));
-                
-                projectData.aiModules.push({
-                    id: "module-" + Date.now(),
-                    title: moduleData.title,
-                    description: moduleData.description,
-                    content: moduleData.content
-                });
-
-                saveProjectToStorage();
-                renderAIModules();
-                
-                // Forzar el salto a la pestaña "Especificaciones" para visualizar el cambio
-                switchTab('tab-specs');
-                
-                showToast(`Módulo "${moduleData.title}" añadido con éxito`);
-                
-                // Pequeño efecto visual para que el usuario note que algo apareció abajo
-                setTimeout(() => {
-                    const container = document.getElementById('ai-modules-container');
-                    container.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                    container.lastElementChild?.classList.add('ring-2', 'ring-brand-teal');
-                    setTimeout(() => container.lastElementChild?.classList.remove('ring-2', 'ring-brand-teal'), 2000);
-                }, 150);
-
+                document.execCommand('copy');
+                showToast();
             } catch (err) {
-                console.error("Fallo al importar el módulo:", err);
-                showToast("Hubo un error al procesar el módulo");
+                console.error('Failed to copy', err);
             }
-        }
-
-        function renderAIModules() {
-            const container = document.getElementById('ai-modules-container');
-            const placeholder = document.getElementById('no-modules-placeholder');
-
-            if (projectData.aiModules.length > 0) {
-                placeholder.classList.add('hidden');
-            } else {
-                placeholder.classList.remove('hidden');
-            }
-
-            const cards = container.querySelectorAll('.ai-module-card');
-            cards.forEach(c => c.remove());
-
-            projectData.aiModules.forEach(mod => {
-                const card = document.createElement('div');
-                card.className = "ai-module-card bg-brand-card border border-brand-border rounded-xl p-5 relative group transition hover:border-brand-teal/50 shadow-md";
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-4 gap-2">
-                        <div>
-                            <h4 class="text-sm font-bold text-slate-100 flex items-center gap-2 mb-1.5">
-                                <i class="fa-solid fa-code-branch text-brand-teal text-xs"></i> ${mod.title}
-                            </h4>
-                            <p class="text-[11px] text-slate-400 leading-snug">${mod.description}</p>
-                        </div>
-                        <button onclick="deleteAIModule('${mod.id}')" class="text-slate-500 hover:text-red-400 p-1.5 transition opacity-0 group-hover:opacity-100 bg-slate-900 rounded border border-slate-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
-                    </div>
-                    <div class="bg-slate-950/80 border border-slate-800 rounded-lg p-3.5 text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto dark-scrollbar shadow-inner">
-                        ${escapeHTML(mod.content)}
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function deleteAIModule(id) {
-            projectData.aiModules = projectData.aiModules.filter(m => m.id !== id);
-            saveProjectToStorage();
-            renderAIModules();
-            showToast("Módulo eliminado permanentemente");
-        }
-
-        function triggerQuickAction(action) {
-            let prompt = "";
-            switch (action) {
-                case 'flow-promos':
-                    prompt = "Diseña detalladamente el flujo conversacional paso a paso para el módulo de 'Promociones y Beneficios (Cross-selling)' de la Fase 1, indicando cómo ofrecer de manera proactiva las mejores promociones vigentes al cliente.";
-                    break;
-                case 'flow-alerts':
-                    prompt = "Detalla el flujo conversacional de 'Atención Personalizada' en la Fase 2, enfocándote en cómo el bot genera alertas proactivas de premios por cobrar e incentivos basados en el historial del perfil de juego.";
-                    break;
-                case 'flow-artifacts':
-                    prompt = "Describe con detalle los entregables e hitos del proyecto conversacional, indicando cómo estructurar la Matriz de Intents, árboles de decisión en Figma, contratos de API OAuth y motor de recomendaciones.";
-                    break;
-            }
-            sendChatMessage(prompt);
-        }
-
-        window.onload = function() {
-            loadProjectData();
             
-            document.getElementById('project-title-display').innerText = projectData.title;
-            document.getElementById('project-desc-display').innerText = projectData.description;
-            document.getElementById('project-goal-display').innerText = projectData.goal;
+            document.body.removeChild(tempTextArea);
+        }
 
-            renderPhases();
-            renderMilestones();
-            renderGanttAndBacklog();
-            renderKPIs();
-            renderAIModules();
+        // Toast functionality
+        function showToast() {
+            const toast = document.getElementById("toast");
+            toast.className = toast.className.replace("hidden", "");
+            toast.classList.add("show");
+            
+            setTimeout(function(){ 
+                toast.classList.remove("show"); 
+            }, 3000);
         }
     </script>
 </body>
