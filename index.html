@@ -89,6 +89,10 @@
                 <i data-lucide="plus-circle" class="w-5 h-5 shrink-0"></i>
                 <span class="text-sm">Crear Nuevo Caso</span>
             </button>
+            <button onclick="toggleEditMode()" id="btn-edit-mode" class="w-full flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg text-slate-300 transition-colors text-left mt-2">
+                <i data-lucide="edit-3" class="w-5 h-5 shrink-0"></i>
+                <span class="text-sm">Modo Edición Rápida</span>
+            </button>
             <button onclick="toggleChat()" class="w-full flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg text-violet-400 transition-colors text-left mt-2">
                 <i data-lucide="sparkles" class="w-5 h-5 shrink-0"></i>
                 <span class="text-sm">Asistente AI (Gema)</span>
@@ -225,6 +229,26 @@
                                 <button onclick="copyText('speech-a')" class="absolute top-3 right-3 text-slate-400 hover:text-green-600 bg-slate-50 hover:bg-green-100 p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-sm"><i data-lucide="copy" class="w-4 h-4"></i> COPIAR SPEECH</button>
                                 <p class="text-sm text-slate-700 pr-24 leading-relaxed" id="speech-a">Gracias por la información, [Nombre del Cliente]. Como tienes activa la opción de recibir premios en tu cuenta, el sistema ha protegido tu dinero y lo ha convertido automáticamente en una recarga. Por favor, inicia sesión en tu cuenta de Tinka y verifica tu saldo. Con ese dinero podrás generar tu jugada nuevamente. ¡Confírmanos si logras visualizarlo para quedarnos tranquilos!</p>
                             </div>
+                            <div class="mt-4 pt-4 border-t border-green-200 flex justify-end">
+                                <button onclick="showResult('A2')" class="text-sm bg-white border border-green-300 hover:bg-green-100 text-green-800 px-4 py-2 rounded-lg font-medium transition-colors">
+                                    El cliente mantiene el reclamo (Exige bono) <i data-lucide="arrow-right" class="w-4 h-4 inline ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Result A2 (Sub-escenario) -->
+                        <div id="result-A2" class="space-y-4 hidden fade-in bg-purple-50 p-6 rounded-xl border border-purple-200">
+                            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                                <div>
+                                    <h4 class="font-bold text-purple-800 flex items-center gap-2 text-lg"><i data-lucide="gift" class="w-6 h-6"></i> Escenario A.2: Mantiene reclamo (Bono)</h4>
+                                    <p class="text-sm text-purple-700 mt-2">El cliente tiene el saldo pero exige más solución. Ofrécele un bono adicional por las molestias y <span class="font-bold bg-purple-200 px-1 rounded">deriva a Digital</span>.</p>
+                                </div>
+                                <button onclick="resetFlow()" class="text-sm text-purple-700 hover:text-purple-900 font-medium shrink-0 flex items-center gap-1 bg-purple-200/50 hover:bg-purple-200 px-3 py-1.5 rounded-lg transition-colors"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reiniciar Flujo</button>
+                            </div>
+                            <div class="bg-white border border-purple-200 rounded-lg p-4 shadow-sm relative group mt-4">
+                                <button onclick="copyText('speech-a2')" class="absolute top-3 right-3 text-slate-400 hover:text-purple-600 bg-slate-50 hover:bg-purple-100 p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-sm"><i data-lucide="copy" class="w-4 h-4"></i> COPIAR SPEECH</button>
+                                <p class="text-sm text-slate-700 pr-24 leading-relaxed" id="speech-a2">Comprendemos tu malestar, [Nombre del Cliente]. Como compensación por los inconvenientes con tu pago, hemos escalado tu caso a nuestra área Digital para otorgarte un bono adicional en tu cuenta. Este proceso puede tomar hasta 24/48 horas. Te notificaremos en cuanto el bono esté disponible.</p>
+                            </div>
                         </div>
 
                         <!-- Result B -->
@@ -254,6 +278,26 @@
                             <div class="bg-white border border-blue-200 rounded-lg p-4 shadow-sm relative group mt-4">
                                 <button onclick="copyText('speech-c')" class="absolute top-3 right-3 text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-100 p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-sm"><i data-lucide="copy" class="w-4 h-4"></i> COPIAR SPEECH</button>
                                 <p class="text-sm text-slate-700 pr-24 leading-relaxed" id="speech-c">Entendemos la situación, [Nombre del Cliente]. Al jugar como invitado, el sistema no tiene una cuenta a la cual retornar el dinero de forma automática. Para solucionarlo y devolverte el saldo debitado, te pedimos que te registres rápidamente en nuestra web: [Link de registro]. <br><br>Como disculpas por este mal rato, una vez que nos confirmes tu registro y correo asociado, no solo te devolveremos el dinero a tu nueva cuenta, sino que te regalaremos 1 jugada de Tinka totalmente gratis. Quedamos a la espera de tu confirmación.</p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-blue-200 flex justify-end">
+                                <button onclick="showResult('C2')" class="text-sm bg-white border border-blue-300 hover:bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-medium transition-colors">
+                                    No quiere registrarse (Devolución a Banco) <i data-lucide="arrow-right" class="w-4 h-4 inline ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Result C2 (Sub-escenario) -->
+                        <div id="result-C2" class="space-y-4 hidden fade-in bg-rose-50 p-6 rounded-xl border border-rose-200">
+                            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                                <div>
+                                    <h4 class="font-bold text-rose-800 flex items-center gap-2 text-lg"><i data-lucide="landmark" class="w-6 h-6"></i> Escenario C.2: Devolución Bancaria</h4>
+                                    <p class="text-sm text-rose-700 mt-2">El cliente rechaza el registro. Pídele su cuenta/CCI (titular del pago) para devolver el dinero. <span class="font-bold bg-rose-200 px-1 rounded">Tiempos:</span> 7 días (gestión) + 30 días (banco).</p>
+                                </div>
+                                <button onclick="resetFlow()" class="text-sm text-rose-700 hover:text-rose-900 font-medium shrink-0 flex items-center gap-1 bg-rose-200/50 hover:bg-rose-200 px-3 py-1.5 rounded-lg transition-colors"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reiniciar Flujo</button>
+                            </div>
+                            <div class="bg-white border border-rose-200 rounded-lg p-4 shadow-sm relative group mt-4">
+                                <button onclick="copyText('speech-c2')" class="absolute top-3 right-3 text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-rose-100 p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-sm"><i data-lucide="copy" class="w-4 h-4"></i> COPIAR SPEECH</button>
+                                <p class="text-sm text-slate-700 pr-24 leading-relaxed" id="speech-c2">Entendemos tu decisión, [Nombre del Cliente]. En ese caso, para proceder con la devolución de tu dinero a una cuenta bancaria o billetera (Yape/Plin), necesitamos que nos compartas tu número de cuenta directa y tu Código de Cuenta Interbancario (CCI). Es indispensable que la cuenta esté a nombre del titular que realizó el pago. Ten en cuenta que nuestra gestión interna toma alrededor de 7 días hábiles, y la devolución por parte de tu banco puede demorar aproximadamente 30 días hábiles adicionales. Quedamos a la espera de tus datos.</p>
                             </div>
                         </div>
 
@@ -703,7 +747,7 @@ Agradecemos su comprensión.</div>
 
         // Flow Logic
         const steps = [
-            'step-1', 'step-2', 'step-3', 'result-A', 'result-B', 'result-C',
+            'step-1', 'step-2', 'step-3', 'result-A', 'result-B', 'result-C', 'result-A2', 'result-C2',
             'step-vl-1', 'step-vl-2', 'result-vl-A1', 'result-vl-A2', 'result-vl-B', 'result-vl-C'
         ];
 
@@ -771,8 +815,8 @@ Agradecemos su comprensión.</div>
         1. Sé empática, concisa y directa. Eres una compañera de trabajo.
         2. Si te piden redactar un mensaje para un cliente, hazlo con tono profesional, amable y pidiendo disculpas por los inconvenientes.
         3. Formatea tus respuestas usando saltos de línea para que sea fácil de leer en un chat pequeño.
-        4. Si el usuario quiere crear un nuevo caso, indícale que puede redactarlo contigo y luego pegarlo en el botón "Crear Nuevo Caso" (ícono verde con el símbolo + en el menú lateral).
-        5. Si te piden descargar algo, guíalos a usar el botón superior derecho "Descargar" en el panel respectivo.`;
+        4. Si el usuario quiere crear un nuevo caso, indícale que puede redactarlo contigo y luego pegarlo en el botón "Crear Nuevo Caso".
+        5. IMPORTANTE: Eres un chatbot de texto. No puedes "programar", agregar botones, o cambiar la interfaz visual de este dashboard directamente. Si te piden agregar algo a la web, aclara que solo puedes darle el texto y debe pedirle a su desarrollador que lo integre.`;
 
         function toggleChat() {
             const chatWindow = document.getElementById('chat-window');
@@ -893,13 +937,16 @@ Agradecemos su comprensión.</div>
                     // Solo si la API responde con éxito, guardamos la conversación en la memoria principal
                     chatHistory.push(newUserMessage);
                     chatHistory.push(result.candidates[0].content);
+                } else if (result.error) {
+                    console.error("Error devuelto por la API de Gemini:", result.error);
+                    appendMessage('model', `⚠️ Error de API (Código: ${result.error.code}). El modelo pudo haber bloqueado la petición por filtros de seguridad o un formato inválido. Intenta reformular tu pregunta.`);
                 } else {
                     console.error("Respuesta inesperada de Gemini:", result);
-                    appendMessage('model', "Lo siento, hubo un problema al procesar mi respuesta. ¿Podrías intentar de nuevo?");
+                    appendMessage('model', "Lo siento, hubo un problema al procesar mi respuesta. La respuesta de la IA no devolvió ningún texto útil.");
                 }
             } catch (error) {
                 console.error("Error en Fetch:", error);
-                appendMessage('model', "⚠️ Error de conexión. Revisa tu internet e intenta nuevamente.");
+                appendMessage('model', "⚠️ Error de red o conexión fallida. Revisa tu internet e intenta nuevamente.");
             } finally {
                 loadingIndicator.classList.add('hidden');
                 inputField.disabled = false;
@@ -930,14 +977,54 @@ Agradecemos su comprensión.</div>
         }
 
         // Toast functionality
-        function showToast() {
+        function showToast(message = "¡Plantilla copiada al portapapeles!", iconName = "check-circle") {
             const toast = document.getElementById("toast");
+            toast.innerHTML = `<i data-lucide="${iconName}" class="w-5 h-5"></i> <span>${message}</span>`;
+            lucide.createIcons({ root: toast });
+            
             toast.className = toast.className.replace("hidden", "");
             toast.classList.add("show");
             
             setTimeout(function(){ 
                 toast.classList.remove("show"); 
             }, 3000);
+        }
+
+        // --- NEW: Modo Edición Rápida ---
+        let isEditMode = false;
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const btn = document.getElementById('btn-edit-mode');
+            
+            // Seleccionar textos principales del panel central
+            const textElements = document.querySelectorAll('main p, main h2, main h3, main h4, main h5, main li, main .text-sm, main div[id^="sp-"], main div[id^="content-"]');
+
+            if (isEditMode) {
+                btn.innerHTML = `<i data-lucide="save" class="w-5 h-5 shrink-0 text-amber-600"></i><span class="text-sm font-bold text-amber-800">Guardar Cambios</span>`;
+                btn.classList.add('bg-amber-100');
+                btn.classList.remove('text-slate-300', 'hover:bg-slate-800');
+                
+                textElements.forEach(el => {
+                    // Evitar que los botones o menús se vuelvan editables y rompan su click
+                    if (!el.closest('button') && !el.closest('.dropdown-container')) {
+                        el.contentEditable = "true";
+                        el.classList.add('outline-dashed', 'outline-2', 'outline-amber-400', 'outline-offset-4', 'hover:bg-amber-50/50', 'transition-all', 'rounded-sm', 'cursor-text');
+                    }
+                });
+                lucide.createIcons();
+                showToast("Modo edición activado. Escribe directamente sobre los textos.", "edit-3");
+            } else {
+                btn.innerHTML = `<i data-lucide="edit-3" class="w-5 h-5 shrink-0"></i><span class="text-sm">Modo Edición Rápida</span>`;
+                btn.classList.remove('bg-amber-100');
+                btn.classList.add('text-slate-300', 'hover:bg-slate-800');
+                
+                textElements.forEach(el => {
+                    el.contentEditable = "false";
+                    el.classList.remove('outline-dashed', 'outline-2', 'outline-amber-400', 'outline-offset-4', 'hover:bg-amber-50/50', 'transition-all', 'rounded-sm', 'cursor-text');
+                });
+                lucide.createIcons();
+                showToast("Cambios guardados localmente.", "save");
+            }
         }
 
         // Export to Word document functionality
