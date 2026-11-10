@@ -749,6 +749,13 @@ Agradecemos su comprensión.</div>
                 activeBtn.classList.remove('hover:bg-slate-800', 'text-slate-300');
                 activeBtn.classList.add('bg-red-600', 'text-white');
             }
+
+            // Reiniciar los flujos internos al cambiar de caso para evitar que aparezcan vacíos
+            if (caseId === 'tupay') {
+                resetFlow('step-1');
+            } else if (caseId === 'videoloteria') {
+                resetFlow('step-vl-1');
+            }
         }
 
         // --- NEW: Gema AI Chat Logic ---
